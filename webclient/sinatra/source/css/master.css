@@ -1,0 +1,142 @@
+/*= require reset */
+
+html {
+    font-family: sans-serif;
+}
+
+body {
+    color: #333;
+}
+
+#now-playing-container {
+    position: fixed;
+    width: 100%;
+    background-color: #555;
+}
+
+#now-playing {
+    margin: 0.5em auto 0.5em auto;
+    /*margin: 0.5em;*/
+    /*float: left;*/
+    color: #ccc;
+    text-align: center;
+}
+
+#controls {
+    margin: 0.5em 0.5em 0.5em 0.5em;
+    /*margin: 0.5em;*/
+    color: #bbb;
+    /*float: right;*/
+    text-align: center;
+}
+
+#artists-container {
+    padding-top: 4em;
+}
+
+#artists {
+    width: 60%;
+    margin: 0px auto;
+}
+
+.album-details {
+    padding: 1em;
+}
+
+.album-cover {
+    float: left;
+    margin-right: 40px;
+    /*padding-right: 40px;*/
+    /*width: 40%;*/
+    min-width: 300px;
+}
+
+.album-cover img {
+    max-width: 300px;
+    min-width: 300px;
+}
+
+.album-tracks {
+    /*float: left;*/
+    margin-left: 340px;
+    /*position: relative;*/
+    /*width: 60%;*/
+}
+
+.album-tracks ol {
+    list-style-type: none;
+    /*margin-left: 40px;*/
+}
+
+.album-tracks li {
+    padding: 0.33em;
+    background-color: #fafafa;
+}
+
+.album-tracks li.odd {
+    background-color: #f6f6f6;
+}
+
+.album-tracks li .action-status {
+    color: #00F;
+    float: right;
+}
+
+.clear {
+    clear: both;
+}
+
+article h1
+{
+    /*padding: 0.167em;*/
+    font-size: 1.66em;
+    color: #666;
+    /*background-color: #666;*/
+    /*background: linear-gradient(to bottom, rgba(0,0,0,0) 10%,rgba(0,0,0,0.6) 90%);*/
+    /*background: linear-gradient(135deg, rgba(255,255,255,0.4) 0%,rgba(180,180,180,0.77) 42%,rgba(130,130,130,0.85) 61%,rgba(255,255,255,0.8) 100%);*/
+    border-top: 3px solid;
+    border-color: #666;
+    margin-top: 1em;
+}
+
+article h2
+{
+    color: #555;
+    font-size: 1.33em;
+    margin-bottom: .33em;
+    /*margin-left: 40%;*/
+    margin-left: 340px;
+}
+
+.listview {
+    list-style-type: none;
+}
+
+#listview {
+    width: 50%;
+    margin: 1em auto 1em auto;
+}
+
+#listview ol {
+    list-style-type: none;
+    /*list-style-position: inside;*/
+}
+
+#listview li {
+    padding: 0.33em;
+}
+
+#listview li.odd {
+    background-color: #eee;
+}
+
+#listview .duration {
+    float: right;
+}
+
+li.disc-header {
+    color: #666;
+    font-size: 1.33em;
+    font-weight: bold;
+    background-color: #fff;
+}

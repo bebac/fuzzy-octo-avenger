@@ -124,7 +124,6 @@ void run(const options& options)
   //
   player.set_state_info_callback([&](const player_state_info& info)
   {
-    std::cerr << "state info - state=" << info.state << ", track=" << info.track.get() << ", source=" << info.source << std::endl;
     json::object params
     {
       { "state",  info.state },

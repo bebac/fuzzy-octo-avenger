@@ -265,6 +265,9 @@ void spotify_source::process_events_handler()
 // ----------------------------------------------------------------------------
 void spotify_source::play_handler(const std::string& uri, std::weak_ptr<audio_output_t> audio_output)
 {
+  // If currently playing a track, stop it before starting load of the new track.
+  stop_handler();
+
   audio_output_ = audio_output;
 
   std::cerr << "play_handler audio_output=" << audio_output.lock().get() << std::endl;

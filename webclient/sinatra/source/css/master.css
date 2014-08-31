@@ -30,6 +30,14 @@ body {
     text-align: center;
 }
 
+#play_or_stop_action {
+    display: inline-block;
+}
+
+#skip_action {
+    display: inline-block;
+}
+
 #artists-container {
     padding-top: 4em;
 }

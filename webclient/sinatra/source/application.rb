@@ -48,6 +48,10 @@ module TestApp
       Player.call("player/play", nil, env)
     end
 
+    post '/api/skip' do
+      Player.call("player/skip", [], env)
+    end
+
     post '/api/stop' do
       Player.call("player/stop", [], env)
     end

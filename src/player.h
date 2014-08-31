@@ -63,6 +63,7 @@ public:
   //int  play(track_ptr track);
   int  queue(int id, const std::string& source_name="");
   //int  queue(track_ptr track);
+  void skip();
   void stop();
 public:
   player_state_info get_state_info() const;

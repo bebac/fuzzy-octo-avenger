@@ -20,6 +20,7 @@ namespace json_rpc
 {
   json_rpc_response play(player& player, const json_rpc_request& request);
   json_rpc_response queue(player& player, const json_rpc_request& request);
+  json_rpc_response skip(player& player, const json_rpc_request& request);
   json_rpc_response stop(player& player, const json_rpc_request& request);
   json_rpc_response state(player& player, const json_rpc_request& request);
   json_rpc_response cover(player& player, const json_rpc_request& request);

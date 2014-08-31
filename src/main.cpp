@@ -105,6 +105,7 @@ void run(const options& options)
   using std::placeholders::_1;
   service.add_method("player/play",      std::bind(&json_rpc::play,          std::ref(player), _1));
   service.add_method("player/queue",     std::bind(&json_rpc::queue,         std::ref(player), _1));
+  service.add_method("player/skip",      std::bind(&json_rpc::skip,          std::ref(player), _1));
   service.add_method("player/stop",      std::bind(&json_rpc::stop,          std::ref(player), _1));
   service.add_method("player/state",     std::bind(&json_rpc::state,         std::ref(player), _1));
   service.add_method("player/cover",     std::bind(&json_rpc::cover,         std::ref(player), _1));

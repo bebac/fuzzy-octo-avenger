@@ -204,7 +204,7 @@ class ControlsView extends Backbone.View
     el: '#controls'
 
     HTML: """
-    <%= action %>
+    <div id="play_or_stop_action"><%= action %></div> | <div id="skip_action">skip</div>
     """
 
     template: _.template(ControlsView::HTML)
@@ -214,7 +214,8 @@ class ControlsView extends Backbone.View
         @render()
 
     events:
-        'click': "do_action"
+        'click #play_or_stop_action': "do_action"
+        'click #skip_action': "do_skip"
 
     render: ->
         @$el.html @template({ action: @action })
@@ -231,6 +232,13 @@ class ControlsView extends Backbone.View
         req =
             type: "POST"
             url:  "/api/#{@action}"
+            data: null
+        $.ajax(req)
+
+    do_skip: ->
+        req =
+            type: "POST"
+            url:  "/api/skip"
             data: null
         $.ajax(req)
 

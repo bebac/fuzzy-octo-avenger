@@ -109,6 +109,17 @@ int player::queue(track_ptr track)
 #endif
 
 // ----------------------------------------------------------------------------
+void player::skip()
+{
+  command_queue_.push([this]()
+  {
+    close_audio_output();
+    play_stop();
+    play_from_queue();
+  });
+}
+
+// ----------------------------------------------------------------------------
 void player::stop()
 {
   command_queue_.push([this]()

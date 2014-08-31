@@ -115,6 +115,18 @@ namespace json_rpc
   }
 
   // --------------------------------------------------------------------------
+  json_rpc_response skip(player& player, const json_rpc_request& request)
+  {
+    json_rpc_response response{request};
+
+    player.skip();
+
+    response.set_result("ok");
+
+    return response;
+  }
+
+  // --------------------------------------------------------------------------
   json_rpc_response stop(player& player, const json_rpc_request& request)
   {
     json_rpc_response response{request};

@@ -200,11 +200,17 @@ namespace database
     }
     else
     {
+      auto album = (*it).second;
+
       if ( album_json["ids"].is_object() ) {
-        (*it).second->ids(album_json["ids"].as_object());
+        album->ids(album_json["ids"].as_object());
       }
 
-      return (*it).second;
+      if ( album_json["cover"].is_object() ) {
+        album->cover(album_json["cover"].as_object());
+      }
+
+      return album;
     }
   }
 

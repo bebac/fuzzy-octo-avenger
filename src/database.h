@@ -199,6 +199,11 @@ namespace database
     {
       return album_->title();
     }
+  public:
+    int album_id() const
+    {
+      return album_->id();
+    }
   private:
     int        track_id_;
     artist_ptr artist_;

@@ -61,10 +61,16 @@ module TestApp
     end
 
     get '/api/cover' do
-      Player.api.invoke("player/cover", { "album_id" => params['album_id'].to_i }) do |req|
+      if params.key?("album_id")
+        rpc_params = { "album_id" => params['album_id'].to_i }
+      else
+        rpc_params = { "track_id" => params['track_id'].to_i }
+      end
+
+      Player.api.invoke("player/cover", rpc_params) do |req|
 
         req.callback do |result|
-          env['async.callback'].call([ 200, { "Content-Type" => 'image/jpeg' }, Base64.decode64(result['image_data']) ])
+          env['async.callback'].call([ 200, { "Content-Type" => 'image/jpeg', 'Cache-Control' => 'public, max-age=3600' }, Base64.decode64(result['image_data']) ])
         end
 
         req.errback do |error|

@@ -170,18 +170,31 @@ namespace json_rpc
       {
         auto res = player.get_cover(params["album_id"].as_number());
 
-        if ( res.is_object() )
-        {
+        if ( res.is_object() ) {
           response.set_result(res);
         }
-        else if ( res.is_string() )
-        {
+        else if ( res.is_string() ) {
           response.error(1, res.as_string());
         }
         else {
           response.error(2, "unknown error");
         }
       }
+      else if ( params["track_id"].is_number() )
+      {
+        auto res = player.get_cover_by_track_id(params["track_id"].as_number());
+
+        if ( res.is_object() ) {
+          response.set_result(res);
+        }
+        else if ( res.is_string() ) {
+          response.error(1, res.as_string());
+        }
+        else {
+          response.error(2, "unknown error");
+        }
+      }
+
       else {
         response.invalid_params();
       }

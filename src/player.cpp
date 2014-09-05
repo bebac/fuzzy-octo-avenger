@@ -149,6 +149,25 @@ json::value player::get_cover(int album_id) const
 }
 
 // ----------------------------------------------------------------------------
+json::value player::get_cover_by_track_id(int track_id) const
+{
+  auto promise = std::make_shared<std::promise<json::value>>();
+  command_queue_.push([=]()
+  {
+    auto track = db_.find_track(track_id);
+
+    if ( track )
+    {
+      get_cover_handler(track->album_id(), promise);
+    }
+    else {
+      promise->set_value(json::value("track not found"));
+    }
+  });
+  return promise->get_future().get();
+}
+
+// ----------------------------------------------------------------------------
 json::value player::database_index()
 {
   auto promise = std::make_shared<std::promise<json::value>>();

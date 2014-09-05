@@ -69,6 +69,7 @@ public:
   player_state_info get_state_info() const;
 public:
   json::value get_cover(int album_id) const;
+  json::value get_cover_by_track_id(int track_id) const;
 public:
   json::value database_index();
   json::value database_save(json::object track_json);

@@ -68,7 +68,7 @@ public:
 public:
   player_state_info get_state_info() const;
 public:
-  json::value get_cover(int album_id) const;
+  json::value get_cover_by_album_id(int album_id) const;
   json::value get_cover_by_track_id(int track_id) const;
 public:
   json::value database_index();
@@ -88,7 +88,7 @@ private:
   void queue_id_handler(int id, const std::string& source_name, std::shared_ptr<std::promise<int>> promise);
   //void queue_track_handler(track_ptr track, std::shared_ptr<std::promise<int>> promise);
 private:
-  void get_cover_handler(int album_id, std::shared_ptr<std::promise<json::value>> promise) const;
+  void get_cover_by_album_id_handler(int album_id, std::shared_ptr<std::promise<json::value>> promise) const;
 private:
   void database_index_handler(std::shared_ptr<std::promise<json::value>> promise);
   void database_save_handler(json::object track_json, std::shared_ptr<std::promise<json::value>> promise);

@@ -168,7 +168,7 @@ namespace json_rpc
 
       if ( params["album_id"].is_number() )
       {
-        auto res = player.get_cover(params["album_id"].as_number());
+        auto res = player.get_cover_by_album_id(params["album_id"].as_number());
 
         if ( res.is_object() ) {
           response.set_result(res);

@@ -141,10 +141,10 @@ player_state_info player::get_state_info() const
 }
 
 // ----------------------------------------------------------------------------
-json::value player::get_cover(int album_id) const
+json::value player::get_cover_by_album_id(int album_id) const
 {
   auto promise = std::make_shared<std::promise<json::value>>();
-  command_queue_.push(std::bind(&player::get_cover_handler, this, album_id, promise));
+  command_queue_.push(std::bind(&player::get_cover_by_album_id_handler, this, album_id, promise));
   return promise->get_future().get();
 }
 
@@ -158,7 +158,7 @@ json::value player::get_cover_by_track_id(int track_id) const
 
     if ( track )
     {
-      get_cover_handler(track->album_id(), promise);
+      get_cover_by_album_id_handler(track->album_id(), promise);
     }
     else {
       promise->set_value(json::value("track not found"));
@@ -330,19 +330,14 @@ void player::queue_track_handler(track_ptr track, std::shared_ptr<std::promise<i
 #endif
 
 // ----------------------------------------------------------------------------
-void player::get_cover_handler(int album_id, std::shared_ptr<std::promise<json::value>> promise) const
+void player::get_cover_by_album_id_handler(int album_id, std::shared_ptr<std::promise<json::value>> promise) const
 {
   auto album = db_.find_album(album_id);
 
   if ( album )
   {
     json::value result;
-
-    //std::cerr << "get_cover " << *album << std::endl;
-
     json::value cover = album->cover();
-
-    //std::cerr << "get_cover. cover=" << cover << std::endl;
 
     if ( cover.is_null() )
     {
@@ -350,8 +345,7 @@ void player::get_cover_handler(int album_id, std::shared_ptr<std::promise<json::
       {
         auto id = album->find_id(source.first);
 
-        if ( !id.empty() )
-        {
+        if ( !id.empty() ) {
           cover = source.second->get_cover(id);
         }
       }
@@ -361,12 +355,9 @@ void player::get_cover_handler(int album_id, std::shared_ptr<std::promise<json::
       cover = json::value("cover not found");
     }
 
-    //std::cerr << "get_cover.. cover=" << cover << std::endl;
-
     promise->set_value(std::move(cover));
   }
-  else
-  {
+  else {
     promise->set_value(json::value("album not found"));
   }
 }

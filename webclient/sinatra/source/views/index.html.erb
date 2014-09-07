@@ -13,6 +13,23 @@
   </div>
   <div id="artists-container">
     <div id="artists">
+      <script type="text/template" id="artists_tpl">
+        <h1><%%= name %></h1>
+        <ul class="listview"></ul>
+      </script>
+
+      <script type="text/template" id="album_details">
+        <div class="album-details">
+            <h2><%%= title %></h2>
+            <div class="album-cover">
+                <img src="<%%= cover_path %>">
+            </div>
+            <div class="album-tracks">
+                <ol></ol>
+            </div>
+            <div class="clear"></div>
+        </div>
+      </script>
     </div>
   </div>
 </body>

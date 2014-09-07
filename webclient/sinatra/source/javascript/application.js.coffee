@@ -61,23 +61,8 @@ class AlbumTrackListView extends Backbone.View
 class AlbumView extends Backbone.View
     tagName: 'li'
 
-    HTML: """
-    <div class="album-details">
-        <h2><%= title %></h2>
-        <div class="album-cover">
-            <img src="<%= cover_path %>">
-        </div>
-        <div class="album-tracks">
-            <ol></ol>
-        </div>
-        <div class="clear"></div>
-    </div>
-    """
-    #<img src="/api/cover/<%= id %>">
-
-    template: _.template(AlbumView::HTML)
-
     render: ->
+        @template = @template or _.template($("#album_details").html())
         @model.set_cover_path()
         @$el.html @template(@model.attributes)
         tracks_view = new AlbumTrackListView el: @$('.album-tracks > ol'), collection: @model.get('tracks')
@@ -104,15 +89,8 @@ class ArtistAlbumsView extends Backbone.View
 class ArtistView extends Backbone.View
     tagName: 'article'
 
-    HTML: """
-    <h1><%= name %></h1>
-    <ul class="listview">
-    </ul>
-    """
-
-    template: _.template(ArtistView::HTML)
-
     render: ->
+        @template = @template or _.template($("#artists_tpl").html())
         @$el.html @template(@model.attributes)
         albums_view = new ArtistAlbumsView el: @$('ul'), collection: @model.get('albums')
         albums_view.render()

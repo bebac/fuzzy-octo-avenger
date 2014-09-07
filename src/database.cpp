@@ -142,10 +142,35 @@ namespace database
   }
 
   // --------------------------------------------------------------------------
-  void index::remove(track_ptr track)
+  void index::delete_track(track_ptr track)
   {
     track->album_->remove_track(track);
     tracks_.erase(track->track_id());
+  }
+
+  // --------------------------------------------------------------------------
+  void index::delete_album(album_ptr album)
+  {
+    // Delete all album tracks.
+    for ( auto& track : album->tracks_ ) {
+      tracks_.erase(track->track_id());
+    }
+
+    album->tracks_.clear();
+
+    // Delete album.
+    auto it = std::find_if(begin(albums_), end(albums_), [=](const std::pair<std::string, album_ptr>& it) {
+      return it.second == album;
+    });
+
+    if ( it != end(albums_) )  {
+      std::cerr << "delete album " << album->title() << std::endl;
+      albums_.erase((*it).first);
+    }
+
+    for ( auto& it : artists_ ) {
+      it.second->remove_album(album);
+    }
   }
 
   // --------------------------------------------------------------------------

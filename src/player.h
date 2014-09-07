@@ -73,7 +73,8 @@ public:
 public:
   json::value database_index();
   json::value database_save(json::object track_json);
-  std::string database_delete(int id);
+  std::string database_delete_track(int track_id);
+  std::string database_delete_album(int album_id);
   json::value database_export_tracks();
   json::value database_import_tracks(json::array tracks);
 public:
@@ -91,7 +92,8 @@ private:
 private:
   void database_index_handler(std::shared_ptr<std::promise<json::value>> promise);
   void database_save_handler(json::object track_json, std::shared_ptr<std::promise<json::value>> promise);
-  void database_delete_handler(int id, std::shared_ptr<std::promise<std::string>> promise);
+  void database_delete_track_handler(int id, std::shared_ptr<std::promise<std::string>> promise);
+  void database_delete_album_handler(int id, std::shared_ptr<std::promise<std::string>> promise);
   void database_export_tracks_handler(std::shared_ptr<std::promise<json::value>> promise);
   void database_import_tracks_handler(json::array tracks, std::shared_ptr<std::promise<json::value>> promise);
 private:

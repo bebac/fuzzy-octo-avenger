@@ -184,10 +184,18 @@ json::value player::database_save(json::object track_json)
 }
 
 // ----------------------------------------------------------------------------
-std::string player::database_delete(int id)
+std::string player::database_delete_track(int track_id)
 {
   auto promise = std::make_shared<std::promise<std::string>>();
-  command_queue_.push(std::bind(&player::database_delete_handler, this, id, promise));
+  command_queue_.push(std::bind(&player::database_delete_track_handler, this, track_id, promise));
+  return promise->get_future().get();
+}
+
+// ----------------------------------------------------------------------------
+std::string player::database_delete_album(int album_id)
+{
+  auto promise = std::make_shared<std::promise<std::string>>();
+  command_queue_.push(std::bind(&player::database_delete_album_handler, this, album_id, promise));
   return promise->get_future().get();
 }
 
@@ -380,20 +388,38 @@ void player::database_save_handler(json::object track_json, std::shared_ptr<std:
 }
 
 // ----------------------------------------------------------------------------
-void player::database_delete_handler(int id, std::shared_ptr<std::promise<std::string>> promise)
+void player::database_delete_track_handler(int id, std::shared_ptr<std::promise<std::string>> promise)
 {
-  std::cerr << "database_delete_handler track_id=" << id << std::endl;
+  std::cerr << "database_delete_track_handler track_id=" << id << std::endl;
 
   auto track = db_.find_track(id);
 
   if ( track )
   {
-    db_.remove(track);
+    db_.delete_track(track);
     promise->set_value("");
   }
   else
   {
     promise->set_value("track not found");
+  }
+}
+
+// ----------------------------------------------------------------------------
+void player::database_delete_album_handler(int id, std::shared_ptr<std::promise<std::string>> promise)
+{
+  std::cerr << "database_delete_album_handler album_id=" << id << std::endl;
+
+  auto album = db_.find_album(id);
+
+  if ( album )
+  {
+    db_.delete_album(album);
+    promise->set_value("");
+  }
+  else
+  {
+    promise->set_value("album not found");
   }
 }
 

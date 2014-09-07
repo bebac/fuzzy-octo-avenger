@@ -253,7 +253,26 @@ namespace json_rpc
 
         if ( track["id"].is_number() )
         {
-          auto msg = player.database_delete(track["id"].as_number());
+          auto msg = player.database_delete_track(track["id"].as_number());
+
+          if ( msg.empty() ) {
+            response.set_result("ok");
+          }
+          else {
+            response.error(1, msg);
+          }
+        }
+        else {
+          response.invalid_params();
+        }
+      }
+      else if ( params["album"].is_object() )
+      {
+        auto album = params["album"].as_object();
+
+        if ( album["id"].is_number() )
+        {
+          auto msg = player.database_delete_album(album["id"].as_number());
 
           if ( msg.empty() ) {
             response.set_result("ok");

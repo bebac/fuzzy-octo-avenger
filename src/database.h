@@ -151,6 +151,15 @@ namespace database
     {
       albums_.push_back(album);
     }
+  public:
+    void remove_album(album_ptr album)
+    {
+      auto it = std::find(begin(albums_), end(albums_), album);
+
+      if ( it != end(albums_) ) {
+        albums_.erase(it);
+      }
+    }
   private:
     std::string     name_;
     album_container albums_;
@@ -225,7 +234,8 @@ namespace database
     track_ptr save(json::object track_json);
     track_ptr save(track_ptr track);
   public:
-    void remove(track_ptr track);
+    void delete_track(track_ptr track);
+    void delete_album(album_ptr album);
   public:
     artist_ptr get_artist(const std::string& name);
   public:

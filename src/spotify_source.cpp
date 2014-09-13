@@ -68,7 +68,11 @@ public:
 public:
   void load_image()
   {
-    assert(album_is_loaded());
+    if ( !album_is_loaded() )
+    {
+      load_album();
+      return;
+    }
 
     sp_link* link = sp_link_create_from_album_cover(album_, SP_IMAGE_SIZE_NORMAL);
 

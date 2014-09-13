@@ -7,31 +7,50 @@
 </head>
 
 <body>
+
   <div id="now-playing-container">
     <div id="now-playing"></div>
     <div id="controls"></div>
   </div>
-  <div id="artists-container">
-    <div id="artists">
-      <script type="text/template" id="artists_tpl">
-        <h1><%%= name %></h1>
-        <ul class="listview"></ul>
-      </script>
 
-      <script type="text/template" id="album_details">
-        <div class="album-details">
-            <h2><%%= title %></h2>
-            <div class="album-cover">
-                <img src="<%%= cover_path %>">
+  <script type="text/template" id="album-details-view">
+    <div>
+      <div class="cover">
+        <img src="<%%= cover_path %>">
+      </div>
+      <h1><%%= title %></h1>
+      <h2><%%= artist %></h2>
+      <hr>
+      <ol class="track-list">
+      </ol>
+    </div>
+  </script>
+
+  <div id="album-details-container" class="hidden">
+    <div id="album-details">
+    </div>
+  </div>
+
+  <div id="albums-view-container">
+    <div id="albums-view">
+      <script type="text/template" id="album-view">
+        <div class="album">
+          <div class="title-wrap">
+            <div class="title">
+              <p><%%= title %></p>
             </div>
-            <div class="album-tracks">
-                <ol></ol>
-            </div>
-            <div class="clear"></div>
+          </div>
+          <div class="cover">
+            <img src="<%%= cover_path %>">
+          </div>
+          <div class="artist">
+            <%%= artist %>
+          </div>
         </div>
       </script>
     </div>
   </div>
+
 </body>
 
 </html>

@@ -58,26 +58,64 @@ class AlbumTrackListView extends Backbone.View
 
 
 
-class AlbumView extends Backbone.View
-    tagName: 'li'
+class AlbumDetailsView extends Backbone.View
+    el: '#album-details'
+
+    initialize: ->
+        @render()
+        $("#album-details-container").show()
+        $("#album-details-container").click (event) =>
+            if event.target.id == "album-details-container"
+                #$('body').toggleClass('hide-overflow')
+                $("#album-details-container").hide()
+
 
     render: ->
-        @template = @template or _.template($("#album_details").html())
+        @template = @template or _.template($("#album-details-view").html())
         @model.set_cover_path()
         @$el.html @template(@model.attributes)
-        tracks_view = new AlbumTrackListView el: @$('.album-tracks > ol'), collection: @model.get('tracks')
-        tracks_view.render()
+        @tracks_view = new AlbumTrackListView el: @$('.track-list'), collection: @model.get('tracks')
+        @tracks_view.render()
         @
 
+    nodefault: (event) ->
+        event.preventDefault()
 
 
-class ArtistAlbumsView extends Backbone.View
+
+class AlbumView extends Backbone.View
+    tagName: 'div'
+
+    events:
+        'click': "show"
+
+    render: ->
+        @template = @template or _.template($("#album-view").html())
+        @model.set_cover_path()
+        @$el.html @template(@model.attributes)
+        @
+
+    show: ->
+        #$('body').toggleClass('hide-overflow')
+        view = new AlbumDetailsView model: @model
+
+
+
+class AlbumsView extends Backbone.View
+    el: '#albums-view'
+
+    initialize: (collection) ->
+        @collection = collection
+        console.log(@collection)
 
     append_album: (view) ->
         @$el.append(view.el)
 
     render: ->
-        @render_album(album) for album in @collection.models
+        for artist in @collection.models
+            for album in artist.get("albums").models
+                album.set("artist", artist.get("name"))
+                @render_album(album)
         @
 
     render_album: (album) ->
@@ -85,38 +123,6 @@ class ArtistAlbumsView extends Backbone.View
         @append_album(view.render())
 
 
-
-class ArtistView extends Backbone.View
-    tagName: 'article'
-
-    render: ->
-        @template = @template or _.template($("#artists_tpl").html())
-        @$el.html @template(@model.attributes)
-        albums_view = new ArtistAlbumsView el: @$('ul'), collection: @model.get('albums')
-        albums_view.render()
-        @
-
-
-
-class ArtistsView extends Backbone.View
-    el: '#artists'
-
-    initialize: (collection) ->
-        @collection = collection
-        #@collection.on("reset", @render, @);
-        #@collection.on("changed", @render, @);
-        console.log(@collection)
-
-    append_artist: (view) ->
-        @$el.append(view.el)
-
-    render: ->
-        @render_artist(artist) for artist in @collection.models
-        @
-
-    render_artist: (artist) ->
-        view = new ArtistView model: artist
-        @append_artist(view.render())
 
 class StateModel extends Backbone.Model
 
@@ -229,5 +235,5 @@ $ ->
     db = new Database
 
     db.fetch success: ->
-        artists_view = new ArtistsView(db.get('artists').sort())
-        artists_view.render()
+        albums_view = new AlbumsView(db.get('artists').sort())
+        albums_view.render()

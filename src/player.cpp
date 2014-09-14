@@ -257,7 +257,8 @@ void player::play_id_handler(int id, const std::string& source_name, std::shared
     {
       promise->set_value(player_status_ok);
 
-      state_.track = track;
+      state_.track  = track;
+      state_.source = src.name;
 
       open_audio_output();
       source_play(src);
@@ -476,6 +477,7 @@ void player::play_stop()
     }
 
     state_.track.reset();
+    state_.source = std::string();
   }
 }
 
@@ -485,10 +487,10 @@ void player::play_from_queue()
   if ( play_queue_.size() > 0 )
   {
     auto track = play_queue_.front();
-    //auto track = play_queue_.pop();
     auto src   = track->find_source("");
 
-    state_.track = track;
+    state_.track  = track;
+    state_.source = src.name;
 
     if ( !audio_output_ ) {
       open_audio_output();

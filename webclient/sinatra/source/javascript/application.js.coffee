@@ -132,7 +132,7 @@ class NowPlayingView extends Backbone.View
     el: '#now-playing'
 
     HTML: """
-    [ <%= state %> ] : <b><%= title %></b> &bull; <%= artist %> &bull; <%= album %>
+    [ <%= state %>, <%= source %> ] : <b><%= title %></b> &bull; <%= artist %> &bull; <%= album %>
     """
 
     template: _.template(NowPlayingView::HTML)
@@ -145,7 +145,7 @@ class NowPlayingView extends Backbone.View
 
     render: ->
         #@$el.html @template({ state: @state, title: @title, artist: @artist, album: @album })
-        @$el.html @template({ state: @model.get("state"), title: @title, artist: @artist, album: @album })
+        @$el.html @template({ state: @model.get("state"), source: @model.get("source"), title: @title, artist: @artist, album: @album })
         @
 
     clear_track: ->
@@ -165,6 +165,7 @@ class NowPlayingView extends Backbone.View
             data: []
         $.ajax(req).done (msg) =>
             @model.set("state", msg.state)
+            @model.set("source", msg.source)
             @update_track(msg.track) if msg.track
             @render()
 
@@ -178,6 +179,7 @@ class NowPlayingView extends Backbone.View
                 else
                     @clear_track()
                 @model.set("state", msg.params.state)
+                @model.set("source", msg.params.source)
                 @render()
         es.onerror = (error) =>
             console.log(error)

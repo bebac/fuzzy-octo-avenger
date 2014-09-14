@@ -79,12 +79,12 @@ public:
 public:
   ssize_t recv(void *buf, size_t len, int flags)
   {
-    return ::recv(fd_, buf, len, flags);
+    return ::recv(fd_, buf, len, flags|MSG_NOSIGNAL);
   }
 public:
   ssize_t send(const void *buf, size_t len, int flags)
   {
-    return ::send(fd_, buf, len, flags);
+    return ::send(fd_, buf, len, flags|MSG_NOSIGNAL);
   }
 public:
   void nonblocking(bool value)

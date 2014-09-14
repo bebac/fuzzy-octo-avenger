@@ -16,10 +16,11 @@ TEST_CASE("push value on empty queue", "[player_queue]")
 {
   player_queue<std::string> q;
 
-  q.push("first", 2);
+  auto pos = q.push("first", 2);
 
   REQUIRE( !q.empty() );
   REQUIRE( q.front() == "first" );
+  REQUIRE( pos == 1 );
 }
 
 // ----------------------------------------------------------------------------
@@ -27,8 +28,8 @@ TEST_CASE("same priority values should pop in fifo order", "[player_queue]")
 {
   player_queue<std::string> q;
 
-  q.push("1", 2);
-  q.push("2", 2);
+  REQUIRE( q.push("1", 2) == 1 );
+  REQUIRE( q.push("2", 2) == 2 );
 
   REQUIRE( !q.empty() );
   REQUIRE( q.pop() == "1" );
@@ -40,11 +41,11 @@ TEST_CASE("highest priority values should pop first in fifo order", "[player_que
 {
   player_queue<std::string> q;
 
-  q.push("3", 2);
-  q.push("5", 3);
-  q.push("1", 1);
-  q.push("4", 2);
-  q.push("2", 1);
+  REQUIRE( q.push("3", 2) == 1 );
+  REQUIRE( q.push("5", 3) == 2 );
+  REQUIRE( q.push("1", 1) == 1 );
+  REQUIRE( q.push("4", 2) == 3 );
+  REQUIRE( q.push("2", 1) == 2 );
 
   REQUIRE( !q.empty() );
   REQUIRE( q.pop() == "1" );

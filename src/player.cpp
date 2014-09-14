@@ -298,9 +298,7 @@ void player::queue_id_handler(int id, const std::string& source_name, std::share
 
   if ( track )
   {
-    play_queue_.push(track);
-
-    promise->set_value(play_queue_.size());
+    promise->set_value(play_queue_.push(track));
 
     if ( state_.state == stopped ) {
       play_from_queue();

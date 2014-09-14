@@ -49,10 +49,14 @@ public:
     return q_.size();
   }
 public:
-  void push(T value, unsigned priority=1)
+  size_t push(T value, unsigned priority=1)
   {
     q_.emplace(begin(q_), element{value, priority});
     std::stable_sort(q_.begin(), q_.end());
+
+    auto pos = std::count_if(q_.begin(), q_.end(), [&](const element& elm) { return priority >= elm.priority; });
+
+    return pos;
   }
 public:
   T pop()

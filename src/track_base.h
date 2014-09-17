@@ -116,6 +116,21 @@ public:
   virtual const std::string& artist() const = 0;
   virtual const std::string& album() const = 0;
 public:
+  void tag_add(std::string tag)
+  {
+    tags_.insert(std::move(tag));
+  }
+public:
+  void tag_remove(const std::string& tag)
+  {
+    tags_.erase(tag);
+  }
+public:
+  const tag_set_t& tags()
+  {
+    return tags_;
+  }
+public:
   const source_list_t& sources() const
   {
     return sources_;
@@ -139,6 +154,7 @@ private:
   int           disc_number_;
   int           duration_;
   double        rating_;
+  tag_set_t     tags_;
   source_list_t sources_;
 };
 

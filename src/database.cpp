@@ -356,6 +356,14 @@ namespace database
             { "rating",   tr->rating() }
           };
 
+          // Build tags array.
+          json::array tags;
+          for ( auto& t : tr->tags() ) {
+            tags.push_back(t);
+          }
+          track["tags"] = std::move(tags);
+
+          // Build sources array.
           json::array sources;
           for ( auto& s : tr->sources() ) {
             sources.push_back(s);
@@ -384,6 +392,8 @@ namespace database
       artists.push_back(artist);
     }
 
+    std::cerr << "saving " << artists.size() << " artists" << std::endl;
+
     index["artists"] = std::move(artists);
 
     std::ofstream os;
@@ -391,6 +401,8 @@ namespace database
     os.open(filename);
     os << to_string(index);
     os.close();
+
+    std::cerr << "saved " << filename << std::endl;
   }
 
   // --------------------------------------------------------------------------
@@ -486,6 +498,19 @@ namespace database
                   trk->artist(art);
                   trk->album(alb);
 
+                  if ( obj["tags"].is_array() )
+                  {
+                    for ( auto& tag_json : obj["tags"].as_array() )
+                    {
+                      if ( tag_json.is_string() ) {
+                        trk->tag_add(tag_json.as_string());
+                      }
+                      else {
+                        throw std::runtime_error("index file - track tag must be a string!");
+                      }
+                    }
+                  }
+
                   for ( auto& src_json : sources )
                   {
                     if ( src_json.is_object() ) {
@@ -557,6 +582,13 @@ namespace database
             { "duration", tr->duration() },
             { "rating",   tr->rating() }
           };
+
+          // Build tags array.
+          json::array tags;
+          for ( auto& t : tr->tags() ) {
+            tags.push_back(t);
+          }
+          track["tags"] = std::move(tags);
 
           tracks.push_back(track);
         }

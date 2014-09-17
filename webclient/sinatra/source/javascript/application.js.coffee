@@ -7,7 +7,12 @@ class AlbumTrackView extends Backbone.View
     tagName: 'li'
 
     #HTML: '<%= title %><span class="duration"><%= duration %></span>'
-    HTML: '<%= track.number() %>&nbsp;&nbsp;&nbsp;<%= track.get("title") %> <span class="action-status"><%= status %></span>'
+    HTML: """
+    <%= track.number() %>&nbsp;&nbsp;&nbsp;
+    <%= track.get("title") %>
+    <span class="duration"><%= track.duration() %></span>
+    <span class="action-status"><%= status %></span>
+    """
 
     template: _.template(AlbumTrackView::HTML)
 

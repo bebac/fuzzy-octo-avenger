@@ -1,7 +1,7 @@
 class @Track extends Backbone.Model
     defaults:
         title: "test"
-        duration: "0:00"
+        duration: ".:.."
 
     number: ->
         tn = @get('tn')
@@ -9,6 +9,16 @@ class @Track extends Backbone.Model
           "0#{tn}"
         else
           tn
+
+    duration: ->
+        duration = @get("duration")
+        if typeof duration == 'string'
+            duration
+        else
+            min = parseInt( duration / 60 ) % 60;
+            sec = duration % 60;
+            if sec < 10 then "#{min}:0#{sec}" else "#{min}:#{sec}"
+
 
 
 

@@ -154,6 +154,16 @@ body {
     border-bottom: 1px solid #eee;
 }
 
+#album-details .track-list li .duration {
+    float: right;
+}
+
+#album-details .track-list li .action-status {
+    float: right;
+    margin-right: 0.66em;
+    color: #00f;
+}
+
 #album-details .track-list li:hover {
     background-color: #eee;
 }

@@ -54,3 +54,18 @@ TEST_CASE("highest priority values should pop first in fifo order", "[player_que
   REQUIRE( q.pop() == "4" );
   REQUIRE( q.pop() == "5" );
 }
+
+// ----------------------------------------------------------------------------
+TEST_CASE("erase specified priority from queue", "[player_queue]")
+{
+  player_queue<std::string> q;
+
+  REQUIRE( q.push("1", 2) == 1 );
+  REQUIRE( q.push("2", 3) == 2 );
+  REQUIRE( q.push("3", 3) == 3 );
+  REQUIRE( q.size() == 3 );
+
+  q.erase_priority(3);
+
+  REQUIRE( q.size() == 1 );
+}

@@ -72,6 +72,14 @@ public:
   {
     return q_.back().value;
   }
+public:
+  void erase_priority(unsigned priority)
+  {
+    auto predicate = [&](const element& elm) {
+      return priority == elm.priority;
+    };
+    q_.erase(std::remove_if(q_.begin(), q_.end(), predicate), q_.end());
+  }
 private:
   std::vector<element> q_;
 };

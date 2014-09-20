@@ -112,6 +112,7 @@ void run(const options& options)
   service.add_method("db/index",         std::bind(&json_rpc::index,         std::ref(player), _1));
   service.add_method("db/save",          std::bind(&json_rpc::save,          std::ref(player), _1));
   service.add_method("db/delete",        std::bind(&json_rpc::erase,         std::ref(player), _1));
+  service.add_method("db/tags",          std::bind(&json_rpc::tags,          std::ref(player), _1));
   service.add_method("db/export-tracks", std::bind(&json_rpc::export_tracks, std::ref(player), _1));
   service.add_method("db/import-tracks", std::bind(&json_rpc::import_tracks, std::ref(player), _1));
   service.add_method("local/scan",       std::bind(&json_rpc::local_scan,    std::ref(player), _1));

@@ -27,6 +27,7 @@ namespace json_rpc
   json_rpc_response index(player& player, const json_rpc_request& request);
   json_rpc_response save(player& player, const json_rpc_request& request);
   json_rpc_response erase(player& player, const json_rpc_request& request);
+  json_rpc_response tags(player& player, const json_rpc_request& request);
   json_rpc_response export_tracks(player& player, const json_rpc_request& request);
   json_rpc_response import_tracks(player& player, const json_rpc_request& request);
   json_rpc_response local_scan(player& player, const json_rpc_request& request);

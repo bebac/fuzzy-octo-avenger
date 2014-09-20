@@ -2,6 +2,7 @@ class @Track extends Backbone.Model
     defaults:
         title: "test"
         duration: ".:.."
+        tags: []
 
     number: ->
         tn = @get('tn')

@@ -126,9 +126,14 @@ public:
     tags_.erase(tag);
   }
 public:
-  const tag_set_t& tags()
+  const tag_set_t& tags() const
   {
     return tags_;
+  }
+public:
+  void tags_clear()
+  {
+    tags_.clear();
   }
 public:
   const source_list_t& sources() const

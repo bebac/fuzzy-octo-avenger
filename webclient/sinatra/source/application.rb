@@ -44,6 +44,10 @@ module TestApp
       Player.call("player/queue", { "id" => params['id'].to_i }, env)
     end
 
+    post '/api/tags' do
+      Player.call("db/save", { "id" => params['id'].to_i, "tags" => params['tags'] }, env)
+    end
+
     post '/api/play' do
       Player.call("player/play", nil, env)
     end

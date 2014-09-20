@@ -4,8 +4,9 @@ html {
     font-family: sans-serif;
 }
 
-body {
+body, input {
     color: #333;
+    font-size: 1em;
 }
 
 .hide-overflow {
@@ -82,7 +83,6 @@ body {
 .album .title,.artist {
     width: 200px;
     height: 2.66em;
-    font-size: 1em;
     display: table-cell;
     vertical-align: middle;
     text-align: center;
@@ -154,13 +154,13 @@ body {
     border-bottom: 1px solid #eee;
 }
 
-#album-details .track-list li .duration {
+#album-details .track-list li .tags,.duration {
     float: right;
+    margin-left: 1em;
 }
 
 #album-details .track-list li .action-status {
-    float: right;
-    margin-right: 0.66em;
+    margin-left: 0.66em;
     color: #00f;
 }
 
@@ -170,6 +170,38 @@ body {
 
 #album-details .track-list li.odd {
     /*background-color: #f6f6f6;*/
+}
+
+#album-details .track-list .track-show-details {
+    padding: 0.166em;
+    color: #ccc;
+    cursor: pointer;
+}
+
+#album-details .track-details {
+    margin: 0.666em 0 0.333em 0;
+}
+
+#album-details .tag, .tag-edit {
+    padding: 0.166em 0.666em 0.166em 0.666em;
+    font-size: 0.833em;
+    border-radius: 10px;
+}
+
+#album-details .tag {
+    background-color: #F9FDE4;
+}
+
+#album-details .tag-edit {
+    background-color: #fff;
+}
+
+#album-details .track-details input {
+    padding: 0.166em 0.666em 0.166em 0.666em;
+    border: 0px solid #fff;
+    border-radius: 10px;
+    color: #666;
+    background-color: #fff;
 }
 
 li.disc-header {

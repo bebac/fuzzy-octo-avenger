@@ -200,6 +200,14 @@ std::string player::database_delete_album(int album_id)
 }
 
 // ----------------------------------------------------------------------------
+json::value player::database_tags()
+{
+  auto promise = std::make_shared<std::promise<json::value>>();
+  command_queue_.push(std::bind(&player::database_tags_handler, this, promise));
+  return promise->get_future().get();
+}
+
+// ----------------------------------------------------------------------------
 json::value player::database_export_tracks()
 {
   auto promise = std::make_shared<std::promise<json::value>>();
@@ -411,6 +419,12 @@ void player::database_delete_album_handler(int id, std::shared_ptr<std::promise<
   {
     promise->set_value("album not found");
   }
+}
+
+// ----------------------------------------------------------------------------
+void player::database_tags_handler(std::shared_ptr<std::promise<json::value>> promise)
+{
+  promise->set_value(db_.tags());
 }
 
 // ----------------------------------------------------------------------------

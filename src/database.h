@@ -237,6 +237,8 @@ namespace database
     void delete_track(track_ptr track);
     void delete_album(album_ptr album);
   public:
+    json::value tags();
+  public:
     artist_ptr get_artist(const std::string& name);
   public:
     //album_ptr get_artist_album(artist_ptr artist, const std::string& title);

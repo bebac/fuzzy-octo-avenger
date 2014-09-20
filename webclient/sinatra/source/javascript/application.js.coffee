@@ -6,12 +6,39 @@
 class AlbumTrackView extends Backbone.View
     tagName: 'li'
 
+    #<span class="tag"><%= tag %></span>
+
     #HTML: '<%= title %><span class="duration"><%= duration %></span>'
     HTML: """
-    <%= track.number() %>&nbsp;&nbsp;&nbsp;
-    <%= track.get("title") %>
-    <span class="duration"><%= track.duration() %></span>
-    <span class="action-status"><%= status %></span>
+    <div class="track">
+      <div style="display:inline-block;vertical-align:top">
+        <%= track.number() %>
+      </div>
+      <div style="display:inline-block">
+        <div>
+          <%= track.get("title") %>&nbsp;<span class="track-show-details">+</span>
+        </div>
+        <div class="track-details" style="display:none">
+          <div>
+            <input class="tag-edit" type="text" value="<%= track.get("tags") %>">
+          </div>
+          <!--<div style="font-size:0.66em">
+            #<%= track.get("id") %>
+          </div>-->
+        </div>
+      </div>
+      <div class="action-status" style="display:inline-block;vertical-align:top">
+        <%= status %>
+      </div>
+      <div class="duration" style="display:inline-block;vertical-align:top">
+        <%= track.duration() %>
+      </div>
+      <div class="tags" style="display:inline-block;vertical-align:top">
+        <% _.each(track.get("tags"), function(tag) { %>
+          <span class="tag"><%= tag %></span>
+        <% }); %>
+      </div>
+    </div>
     """
 
     template: _.template(AlbumTrackView::HTML)
@@ -22,6 +49,10 @@ class AlbumTrackView extends Backbone.View
 
     events:
         'click': "play"
+        'click .track-show-details' : "show_track_details"
+        'click .track-details' : "track_details"
+        'mouseleave' : "hide_track_details"
+        'change .tag-edit': "tags_save"
 
     play: ->
         req =
@@ -30,10 +61,30 @@ class AlbumTrackView extends Backbone.View
             data: { id: @model.get('id') }
         $.ajax(req).done (msg) => @show_action_status(msg)
 
+    show_track_details: (event) ->
+        @$('.track-details').toggle()
+        event.stopPropagation()
+
+    hide_track_details: (event) ->
+        @$('.track-details').hide()
+
+    track_details: (event) ->
+        event.stopPropagation()
+
     show_action_status: (msg) ->
         @status = msg
         @render()
         @$('.action-status').fadeOut(5000)
+
+    tags_save: (event) ->
+        tags = @$('.tag-edit').val().split(/,\s*/)
+        req =
+            type: "POST"
+            url:  "/api/tags"
+            data: { id: @model.get('id'), tags: tags }
+        $.ajax(req).done (msg) =>
+            @model.set("tags", tags)
+            @render()
 
 
 

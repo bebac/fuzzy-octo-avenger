@@ -294,6 +294,16 @@ namespace json_rpc
   }
 
   // --------------------------------------------------------------------------
+  json_rpc_response tags(player& player, const json_rpc_request& request)
+  {
+    json_rpc_response response{request};
+
+    response.set_result(player.database_tags());
+
+    return response;
+  }
+
+  // --------------------------------------------------------------------------
   json_rpc_response export_tracks(player& player, const json_rpc_request& request)
   {
     json_rpc_response response{request};

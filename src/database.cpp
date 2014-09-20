@@ -118,7 +118,46 @@ namespace database
     }
     else
     {
-      // TODO: Update track.
+      if ( track_json["id"].is_number() )
+      {
+        track = find_track(track_json["id"].as_number());
+
+        if ( track )
+        {
+          if ( track_json["tags"].is_array() )
+          {
+            // Replace tags.
+            track->tags_clear();
+
+            for ( auto& tag : track_json["tags"].as_array() )
+            {
+              //std::cerr << "add tag " << to_string(tag) << std::endl;
+              track->tag_add(tag.as_string());
+            }
+          }
+
+          if ( track_json["tags/add"].is_array() )
+          {
+            // Add new tags.
+            for ( auto& tag : track_json["tags/add"].as_array() )
+            {
+              //std::cerr << "add tag " << to_string(tag) << std::endl;
+              track->tag_add(tag.as_string());
+            }
+          }
+
+          // TODO: Update other track attributes.
+
+        }
+        else
+        {
+          // TODO: ERROR!
+        }
+      }
+      else
+      {
+        // TODO: ERROR!
+      }
     }
     return track;
   }
@@ -171,6 +210,13 @@ namespace database
     for ( auto& it : artists_ ) {
       it.second->remove_album(album);
     }
+  }
+
+  // --------------------------------------------------------------------------
+  json::value index::tags()
+  {
+    // TODO: Return a list of all tags.
+    return json::array{};
   }
 
   // --------------------------------------------------------------------------
@@ -646,20 +692,19 @@ json::value to_json(const database::track& track)
     { "album",    track.album() }
   };
 
-  json::array sources;
+  // Build tags array.
+  json::array tags;
+  for ( auto& t : track.tags() ) {
+    tags.push_back(t);
+  }
+  o["tags"] = std::move(tags);
 
+  // Build sources array.
+  json::array sources;
   for ( auto& s : track.sources() ) {
     sources.push_back(s);
   }
-
-  o["sources"] = sources;
-
-  //json::array playlists;
-  //for ( const auto& pl : track.playlists() ) {
-  //  playlists.push_back(pl);
-  //}
-
-  //o["playlists"] = playlists;
+  o["sources"] = std::move(sources);
 
   return std::move(o);
 }

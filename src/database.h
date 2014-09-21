@@ -247,8 +247,8 @@ namespace database
   public:
     track_ptr get_album_track(album_ptr album, const std::string& title);
   public:
-    track_ptr find_track(int id);
-    album_ptr find_album(int id);
+    track_ptr find_track(int id) const;
+    album_ptr find_album(int id) const;
   public:
   #if 0
     std::string find_track_source_uri(int id, const std::string& source);

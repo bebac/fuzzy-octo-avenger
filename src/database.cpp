@@ -320,7 +320,7 @@ namespace database
   }
 
   // --------------------------------------------------------------------------
-  track_ptr index::find_track(int id)
+  track_ptr index::find_track(int id) const
   {
     auto it = tracks_.find(id);
 
@@ -335,7 +335,7 @@ namespace database
   }
 
   // --------------------------------------------------------------------------
-  album_ptr index::find_album(int id)
+  album_ptr index::find_album(int id) const
   {
     auto it = std::find_if(begin(albums_), end(albums_), [=](const std::pair<std::string, album_ptr>& it) {
       return it.second->id() == id;
@@ -616,6 +616,9 @@ namespace database
 
       next_album_id_++;
       next_track_id_++;
+
+      // Save database backup.
+      std::rename(filename.c_str(), (filename+".bak").c_str());
     }
     else
     {

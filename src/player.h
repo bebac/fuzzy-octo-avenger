@@ -44,7 +44,7 @@ struct player_state_info
 class player
 {
 public:
-  player(database::index& db, const std::string& audio_device);
+  player(const std::string& audio_device);
 public:
   ~player();
 public:
@@ -113,7 +113,7 @@ private:
   void source_play(const track_source& source);
   void queue_continuous_playback_tracks();
 private:
-  database::index& db_;
+  database::index  db_;
 private:
   std::function<void(const player_state_info& state_info)> state_info_cb_;
 private:

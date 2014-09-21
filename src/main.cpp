@@ -73,8 +73,7 @@ void run(const options& options)
 {
   dripcore::loop   loop;
   jsonrpc::service service(loop);
-  database::index  db;
-  player           player(db, options.audio_device);
+  player           player(options.audio_device);
 
 #if 0
   if ( signal(SIGPIPE, sig_handler) == SIG_ERR ) {

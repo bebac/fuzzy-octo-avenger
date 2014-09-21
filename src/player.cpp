@@ -20,9 +20,9 @@ static const std::string stopped = "stopped";
 static const std::string playing = "playing";
 
 // ----------------------------------------------------------------------------
-player::player(database::index& db, const std::string& audio_device)
+player::player(const std::string& audio_device)
   :
-  db_(db),
+  db_(),
   audio_device_(audio_device),
   audio_output_(),
   play_queue_(),
@@ -48,8 +48,6 @@ player::~player()
   // Stop player thread.
   running_ = false;
   thr_.join();
-  // Save index.
-  db_.save("index.json");
 }
 
 // ----------------------------------------------------------------------------
@@ -264,17 +262,19 @@ void player::init()
 // ----------------------------------------------------------------------------
 void player::loop()
 {
-    init();
-    while ( running_ )
-    {
-      auto cmd = command_queue_.pop(std::chrono::seconds(5), [this]
-        {
-          if ( continuous_playback_ ) {
-            queue_continuous_playback_tracks();
-          }
-        });
-      cmd();
-    }
+  init();
+  while ( running_ )
+  {
+    auto cmd = command_queue_.pop(std::chrono::seconds(5), [this]
+      {
+        if ( continuous_playback_ ) {
+          queue_continuous_playback_tracks();
+        }
+      });
+    cmd();
+  }
+  // Save index.
+  db_.save("index.json");
 }
 
 // ----------------------------------------------------------------------------

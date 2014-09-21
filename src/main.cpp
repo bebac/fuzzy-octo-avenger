@@ -103,19 +103,20 @@ void run(const options& options)
   }
 
   using std::placeholders::_1;
-  service.add_method("player/play",      std::bind(&json_rpc::play,          std::ref(player), _1));
-  service.add_method("player/queue",     std::bind(&json_rpc::queue,         std::ref(player), _1));
-  service.add_method("player/skip",      std::bind(&json_rpc::skip,          std::ref(player), _1));
-  service.add_method("player/stop",      std::bind(&json_rpc::stop,          std::ref(player), _1));
-  service.add_method("player/state",     std::bind(&json_rpc::state,         std::ref(player), _1));
-  service.add_method("player/cover",     std::bind(&json_rpc::cover,         std::ref(player), _1));
-  service.add_method("db/index",         std::bind(&json_rpc::index,         std::ref(player), _1));
-  service.add_method("db/save",          std::bind(&json_rpc::save,          std::ref(player), _1));
-  service.add_method("db/delete",        std::bind(&json_rpc::erase,         std::ref(player), _1));
-  service.add_method("db/tags",          std::bind(&json_rpc::tags,          std::ref(player), _1));
-  service.add_method("db/export-tracks", std::bind(&json_rpc::export_tracks, std::ref(player), _1));
-  service.add_method("db/import-tracks", std::bind(&json_rpc::import_tracks, std::ref(player), _1));
-  service.add_method("local/scan",       std::bind(&json_rpc::local_scan,    std::ref(player), _1));
+  service.add_method("player/play",      std::bind(&json_rpc::play,                std::ref(player), _1));
+  service.add_method("player/queue",     std::bind(&json_rpc::queue,               std::ref(player), _1));
+  service.add_method("player/skip",      std::bind(&json_rpc::skip,                std::ref(player), _1));
+  service.add_method("player/stop",      std::bind(&json_rpc::stop,                std::ref(player), _1));
+  service.add_method("player/state",     std::bind(&json_rpc::state,               std::ref(player), _1));
+  service.add_method("player/cover",     std::bind(&json_rpc::cover,               std::ref(player), _1));
+  service.add_method("player/ctpb",      std::bind(&json_rpc::continuous_playback, std::ref(player), _1));
+  service.add_method("db/index",         std::bind(&json_rpc::index,               std::ref(player), _1));
+  service.add_method("db/save",          std::bind(&json_rpc::save,                std::ref(player), _1));
+  service.add_method("db/delete",        std::bind(&json_rpc::erase,               std::ref(player), _1));
+  service.add_method("db/tags",          std::bind(&json_rpc::tags,                std::ref(player), _1));
+  service.add_method("db/export-tracks", std::bind(&json_rpc::export_tracks,       std::ref(player), _1));
+  service.add_method("db/import-tracks", std::bind(&json_rpc::import_tracks,       std::ref(player), _1));
+  service.add_method("local/scan",       std::bind(&json_rpc::local_scan,          std::ref(player), _1));
 
   /////
   // Setup callback to get player state info. Note that the callback is

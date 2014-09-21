@@ -80,6 +80,8 @@ public:
   json::value database_import_tracks(json::array tracks);
 public:
   void source_scan(const std::string& source_name);
+public:
+  void set_continuous_playback(json::object value);
 private:
   void init();
   void loop();
@@ -119,7 +121,8 @@ private:
   std::string audio_device_;
   std::shared_ptr<audio_output_t> audio_output_;
   player_queue<database::track_ptr> play_queue_;
-  bool continuous_playback;
+  bool continuous_playback_;
+  json::object continuous_playback_filter_;
   player_state_info state_;
 private:
   std::atomic<bool> running_;

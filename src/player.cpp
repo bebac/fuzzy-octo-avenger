@@ -26,7 +26,7 @@ player::player(database::index& db, const std::string& audio_device)
   audio_device_(audio_device),
   audio_output_(),
   play_queue_(),
-  continuous_playback(true),
+  continuous_playback_(true),
   state_{stopped, nullptr},
   running_(true),
   command_queue_(),
@@ -230,6 +230,33 @@ void player::source_scan(const std::string& source_name)
 }
 
 // ----------------------------------------------------------------------------
+void player::set_continuous_playback(json::object value)
+{
+  auto& filter = value["filter"];
+  auto& enable = value["enable"];
+
+  command_queue_.push([=]()
+  {
+    if ( filter.is_object() ) {
+      continuous_playback_filter_ = std::move(filter.as_object());
+    }
+
+    play_queue_.erase_priority(3);
+
+    if ( enable.is_true() )
+    {
+      continuous_playback_ = true;
+    }
+    else if ( enable.is_false() )
+    {
+      continuous_playback_ = false;
+    }
+
+    queue_continuous_playback_tracks();
+  });
+}
+
+// ----------------------------------------------------------------------------
 void player::init()
 {
 }
@@ -242,7 +269,7 @@ void player::loop()
     {
       auto cmd = command_queue_.pop(std::chrono::seconds(5), [this]
         {
-          if ( continuous_playback ) {
+          if ( continuous_playback_ ) {
             queue_continuous_playback_tracks();
           }
         });
@@ -557,16 +584,37 @@ void player::source_play(const track_source& source)
 // ----------------------------------------------------------------------------
 void player::queue_continuous_playback_tracks()
 {
-  if ( play_queue_.size() < 3 )
+  if ( continuous_playback_ && play_queue_.size() < 3 )
   {
-    auto tracks = db_.tracks();
+    std::vector<database::track_ptr> tracks;
+
+    if ( continuous_playback_filter_["tags"].is_array() )
+    {
+      track_base::tag_set_t tags;
+
+      for ( auto& tag : continuous_playback_filter_["tags"].as_array() ) {
+        tags.insert(tag.as_string());
+      }
+
+      tracks = std::move(db_.tracks(tags));
+
+      std::cerr << "continuous playback filter track.size=" << tracks.size() << std::endl;
+    }
+    else
+    {
+      tracks = std::move(db_.tracks());
+
+      std::cerr << "continuous playback track.size=" << tracks.size() << std::endl;
+    }
 
     std::random_device rd;
     std::mt19937       g(rd());
 
     std::shuffle(tracks.begin(), tracks.end(), g);
 
-    while ( play_queue_.size() < 5 && !tracks.empty())
+    unsigned queue_max = tracks.size() < 25 ? tracks.size() : 5;
+
+    while ( play_queue_.size() < queue_max && !tracks.empty())
     {
       play_queue_.push(tracks.back(), 3);
       tracks.pop_back();

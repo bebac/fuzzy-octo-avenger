@@ -342,4 +342,23 @@ namespace json_rpc
 
     return response;
   }
+
+  // --------------------------------------------------------------------------
+  json_rpc_response continuous_playback(player& player, const json_rpc_request& request)
+  {
+    json_rpc_response response{request};
+
+    if ( request.params().is_object() )
+    {
+      player.set_continuous_playback(std::move(request.params().as_object()));
+      response.set_result("ok");
+    }
+    else
+    {
+      response.invalid_params();
+    }
+
+    return response;
+  }
+
 } // namespace json_rpc

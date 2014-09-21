@@ -230,6 +230,7 @@ namespace database
     index();
   public:
     std::vector<track_ptr> tracks();
+    std::vector<track_ptr> tracks(const track_base::tag_set_t& tags);
   public:
     track_ptr save(json::object track_json);
     track_ptr save(track_ptr track);

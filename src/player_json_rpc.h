@@ -31,6 +31,7 @@ namespace json_rpc
   json_rpc_response export_tracks(player& player, const json_rpc_request& request);
   json_rpc_response import_tracks(player& player, const json_rpc_request& request);
   json_rpc_response local_scan(player& player, const json_rpc_request& request);
+  json_rpc_response continuous_playback(player& player, const json_rpc_request& request);
 } // namespace json_rpc
 
 // ----------------------------------------------------------------------------

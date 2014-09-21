@@ -67,6 +67,25 @@ namespace database
   }
 
   // --------------------------------------------------------------------------
+  std::vector<track_ptr> index::tracks(const track_base::tag_set_t& tags)
+  {
+    std::vector<database::track_ptr> tracks;
+
+    for ( auto& t : tracks_ )
+    {
+      auto& track_tags = t.second->tags();
+
+      auto match = std::find_first_of(begin(track_tags), end(track_tags), begin(tags), end(tags));
+
+      if ( match != end(track_tags) ) {
+        tracks.push_back(t.second);
+      }
+    }
+
+    return std::move(tracks);
+  }
+
+  // --------------------------------------------------------------------------
   track_ptr index::save(json::object track_json)
   {
     auto track = std::make_shared<database::track>();

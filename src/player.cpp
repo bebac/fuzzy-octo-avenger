@@ -45,9 +45,19 @@ player::player(const std::string& audio_device)
 // ----------------------------------------------------------------------------
 player::~player()
 {
-  // Stop player thread.
-  running_ = false;
+  // Wait for player thread to stop.
   thr_.join();
+}
+
+void player::shutdown()
+{
+  command_queue_.push([=]()
+  {
+    // Save index.
+    db_.save("index.json");
+    // Request thread to stop.
+    running_ = false;
+  });
 }
 
 // ----------------------------------------------------------------------------
@@ -273,8 +283,6 @@ void player::loop()
       });
     cmd();
   }
-  // Save index.
-  db_.save("index.json");
 }
 
 // ----------------------------------------------------------------------------

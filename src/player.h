@@ -48,6 +48,8 @@ public:
 public:
   ~player();
 public:
+  void shutdown();
+public:
   void set_state_info_callback(std::function<void(const player_state_info& state_info)> cb)
   {
     state_info_cb_ = cb;

@@ -464,7 +464,7 @@ namespace database
     std::ofstream os;
 
     os.open(filename);
-    os << to_string(index);
+    os << to_string(index) << std::flush;
     os.close();
 
     std::cerr << "saved " << filename << std::endl;

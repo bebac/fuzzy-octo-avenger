@@ -10,7 +10,7 @@ namespace :local do
       client = EventMachine::connect ip, 1100, SpotiHifi::Client, ip, 1100
 
       client.invoke("local/scan", []) do |req|
-        req.timeout 2
+        req.timeout 60
 
         req.callback do |result|
           p result

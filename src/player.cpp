@@ -232,9 +232,21 @@ json::value player::database_import_tracks(json::array tracks)
 }
 
 // ----------------------------------------------------------------------------
-void player::source_scan(const std::string& source_name)
+std::shared_ptr<source_base> player::find_source(const std::string& source_name)
 {
-  command_queue_.push(std::bind(&player::source_scan_handler, this, source_name));
+  auto promise = std::make_shared<std::promise<std::shared_ptr<source_base>>>();
+  command_queue_.push([=]()
+  {
+    auto it = sources_.find(source_name);
+
+    if ( it != end(sources_) ) {
+      promise->set_value((*it).second);
+    }
+    else {
+      promise->set_value(nullptr);
+    }
+  });
+  return promise->get_future().get();
 }
 
 // ----------------------------------------------------------------------------
@@ -474,23 +486,6 @@ void player::database_import_tracks_handler(json::array tracks, std::shared_ptr<
   db_.import_tracks(std::move(tracks));
 
   promise->set_value(json::value(0));
-}
-
-// ----------------------------------------------------------------------------
-void player::source_scan_handler(const std::string& source_name)
-{
-  auto it = sources_.find(source_name);
-
-  if ( it != end(sources_) )
-  {
-    auto source = (*it).second;
-
-    db_.import_tracks(std::move(source->scan()));
-  }
-  else
-  {
-    // TODO!
-  }
 }
 
 // ----------------------------------------------------------------------------

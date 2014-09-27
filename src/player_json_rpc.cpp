@@ -336,9 +336,27 @@ namespace json_rpc
   {
     json_rpc_response response{request};
 
-    player.source_scan("local");
+    auto source = player.find_source("local");
 
-    response.set_result("ok");
+    if ( source )
+    {
+      if ( source->is_scanable() )
+      {
+        auto tracks = source->scan();
+
+        std::cerr << "scanned source 'local' found " << tracks.size() << " tracks" << std::endl;
+
+        player.database_import_tracks(std::move(tracks));
+
+        response.set_result("ok");
+      }
+      else {
+        response.error(2, "source 'local' is not scanable");
+      }
+    }
+    else {
+      response.error(1, "source 'local' not found");
+    }
 
     return response;
   }

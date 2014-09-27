@@ -27,12 +27,12 @@ public:
 public:
   virtual json::value get_cover(const std::string& uri) = 0;
 public:
-  bool is_scanable()
+  virtual bool is_scanable() const
   {
     return false;
   }
 public:
-  virtual json::array scan()
+  virtual json::array scan() const
   {
     return json::array();
   }

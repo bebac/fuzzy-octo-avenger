@@ -221,7 +221,7 @@ json::value local_source::get_cover(const std::string& uri)
 }
 
 // ----------------------------------------------------------------------------
-json::array local_source::scan()
+json::array local_source::scan() const
 {
   json::array tracks;
 

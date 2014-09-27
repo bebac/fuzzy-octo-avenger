@@ -81,7 +81,7 @@ public:
   json::value database_export_tracks();
   json::value database_import_tracks(json::array tracks);
 public:
-  void source_scan(const std::string& source_name);
+  std::shared_ptr<source_base> find_source(const std::string& source_name);
 public:
   void set_continuous_playback(json::object value);
 private:
@@ -102,8 +102,6 @@ private:
   void database_tags_handler(std::shared_ptr<std::promise<json::value>> promise);
   void database_export_tracks_handler(std::shared_ptr<std::promise<json::value>> promise);
   void database_import_tracks_handler(json::array tracks, std::shared_ptr<std::promise<json::value>> promise);
-private:
-  void source_scan_handler(const std::string& source_name);
 private:
   void start_of_track_handler();
   void end_of_track_handler();

@@ -59,12 +59,12 @@ public:
 public:
   json::value get_cover(const std::string& uri);
 public:
-  bool is_scanable()
+  bool is_scanable() const
   {
     return true;
   }
 public:
-  virtual json::array scan();
+  virtual json::array scan() const;
 private:
   std::string dirname_;
 };

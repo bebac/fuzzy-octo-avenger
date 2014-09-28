@@ -143,26 +143,36 @@ namespace database
 
         if ( track )
         {
-          if ( track_json["tags"].is_array() )
+          auto& tags = track_json["tags"];
+
+          if ( tags.is_array() )
           {
             // Replace tags.
             track->tags_clear();
 
-            for ( auto& tag : track_json["tags"].as_array() )
+            for ( auto& tag : tags.as_array() )
             {
               //std::cerr << "add tag " << to_string(tag) << std::endl;
               track->tag_add(tag.as_string());
             }
           }
 
-          if ( track_json["tags/add"].is_array() )
+          auto& tags_add = track_json["tags"];
+
+          if ( tags_add.is_array() )
           {
             // Add new tags.
-            for ( auto& tag : track_json["tags/add"].as_array() )
+            for ( auto& tag : tags_add.as_array() )
             {
               //std::cerr << "add tag " << to_string(tag) << std::endl;
               track->tag_add(tag.as_string());
             }
+          }
+
+          auto& duration = track_json["duration"];
+
+          if ( duration.is_number() ) {
+            track->duration(duration.as_number());
           }
 
           // TODO: Update other track attributes.

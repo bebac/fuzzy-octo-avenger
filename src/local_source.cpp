@@ -15,6 +15,7 @@
 // ----------------------------------------------------------------------------
 #include <taglib/fileref.h>
 #include <taglib/flacfile.h>
+#include <taglib/xiphcomment.h>
 #include <FLAC++/decoder.h>
 #include <b64/encode.h>
 
@@ -239,13 +240,21 @@ json::array local_source::scan() const
         { "album",    json::object{ { "title", tag->album().to8Bit(true) } } },
         { "tn",       tag->track() },
         { "dn",       1 },
-        { "duration", 0 },
-        { "sources",  json::array{ json::object{ { "name", "local" }, { "uri", filename } } } }
+        { "duration", 0 }
       };
+
+      json::object source{ { "name", "local" }, { "uri", filename } };
 
       if ( file_system::extension(filename) == "flac" )
       {
         TagLib::FLAC::File file(filename.c_str());
+
+        TagLib::FLAC::Properties* properties = file.audioProperties();
+
+        if ( properties )
+        {
+          track["duration"] = properties->length();
+        }
 
         const TagLib::List<TagLib::FLAC::Picture*>& images = file.pictureList();
 
@@ -280,7 +289,36 @@ json::array local_source::scan() const
             std::cerr << "unhandled image mime type - " << filename << " images=" << images.size() << ", mime type " << image->mimeType() << std::endl;
           }
         }
+
+        TagLib::Ogg::XiphComment* xiph_comment = file.xiphComment();
+
+        if ( xiph_comment )
+        {
+          auto field_map = xiph_comment->fieldListMap();
+
+          json::object replaygain;
+
+          for ( auto& field : field_map )
+          {
+            if ( field.first == "REPLAYGAIN_REFERENCE_LOUDNESS" )
+            {
+              auto ref_loudness = std::stod(field.second[0].to8Bit());
+              replaygain["reference_loudness"] = ref_loudness;
+            }
+            else if ( field.first == "REPLAYGAIN_TRACK_GAIN" )
+            {
+              auto gain = std::stod(field.second[0].to8Bit());
+              replaygain["track_gain"] = gain;
+            }
+          }
+
+          if ( !replaygain.empty() ) {
+            source["replaygain"] = replaygain;
+          }
+        }
       }
+
+      track["sources"] = json::array{ std::move(source) };
 
       tracks.push_back(track);
     }

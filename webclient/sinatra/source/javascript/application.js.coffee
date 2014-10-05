@@ -78,6 +78,7 @@ class AlbumTrackView extends Backbone.View
 
     tags_save: (event) ->
         tags = @$('.tag-edit').val().split(/,\s*/)
+        tags = tags.filter (t) -> t.length > 0
         req =
             type: "POST"
             url:  "/api/tags"

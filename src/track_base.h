@@ -26,6 +26,7 @@ struct track_source
 {
   std::string name;
   std::string uri;
+  json::value replaygain;
 };
 
 // ----------------------------------------------------------------------------
@@ -150,7 +151,11 @@ public:
     }
     else
     {
-      return track_source{sources_[0]["name"].as_string(), sources_[0]["uri"].as_string()};
+      return track_source{
+        sources_[0]["name"].as_string(),
+        sources_[0]["uri"].as_string(),
+        sources_[0]["replaygain"]
+      };
     }
   }
 private:

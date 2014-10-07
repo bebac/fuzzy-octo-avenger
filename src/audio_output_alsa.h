@@ -51,6 +51,7 @@ public:
     sample_rate_(44100),
     queued_frames_(0),
     device_name_(device_name),
+    replaygain_(0),
     running_(true),
     command_queue_(),
     thr_{&audio_output_t::main, this}
@@ -105,15 +106,22 @@ public:
     });
   }
 public:
+  void set_replaygain(double db)
+  {
+    replaygain_ = db;
+  }
+public:
   void write_s16_le_i(const void* frames, size_t num_frames)
   {
     auto ibuf = reinterpret_cast<const s16_le_frame*>(frames);
     auto obuf = std::shared_ptr<s32_le_frame>(new s32_le_frame[num_frames], std::default_delete<s32_le_frame[]>());
 
+    unsigned scale = 16 - gain_factor();
+
     for( size_t i = 0; i < num_frames; i++ )
     {
-      obuf.get()[i].l = ((int32_t)ibuf[i].l<<16);
-      obuf.get()[i].r = ((int32_t)ibuf[i].r<<16);
+      obuf.get()[i].l = ((int32_t)ibuf[i].l<<scale);
+      obuf.get()[i].r = ((int32_t)ibuf[i].r<<scale);
     }
 
     command_queue_.push([=]{
@@ -128,10 +136,12 @@ public:
     auto ibuf = reinterpret_cast<const s32_le_frame*>(frames);
     auto obuf = std::shared_ptr<s32_le_frame>(new s32_le_frame[num_frames], std::default_delete<s32_le_frame[]>());
 
+    unsigned scale = gain_factor();
+
     for( size_t i = 0; i < num_frames; i++ )
     {
-      obuf.get()[i].l = ((int32_t)ibuf[i].l);
-      obuf.get()[i].r = ((int32_t)ibuf[i].r);
+      obuf.get()[i].l = ((int32_t)ibuf[i].l)>>scale;
+      obuf.get()[i].r = ((int32_t)ibuf[i].r)>>scale;
     }
 
     command_queue_.push([=]{
@@ -220,6 +230,22 @@ private:
     }
   }
 private:
+  unsigned gain_factor()
+  {
+    if ( replaygain_ > -3 ) {
+      return 0;
+    }
+    else if ( replaygain_ > -9 ) {
+      return 1;
+    }
+    else if ( replaygain_ > -15 ) {
+      return 2;
+    }
+    else {
+      return 3;
+    }
+  }
+private:
   void main()
   {
     init();
@@ -242,6 +268,7 @@ private:
   std::atomic<unsigned> sample_rate_;
   std::atomic<int>      queued_frames_;
   std::string           device_name_;
+  double                replaygain_;
 private:
   std::atomic<bool>     running_;
   cmdque_t              command_queue_;

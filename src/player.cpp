@@ -232,6 +232,23 @@ json::value player::database_import_tracks(json::array tracks)
 }
 
 // ----------------------------------------------------------------------------
+void player::database_update_track_source(int track_id, json::object source_json)
+{
+  auto track = db_.find_track(track_id);
+
+  if ( track )
+  {
+    track->source_add(source_json);
+    std::cerr << "player::database_update_track_source " << to_json(*track) << std::endl;
+  }
+  else
+  {
+    std::cerr << "player::database_update_track_source - track not found id=" << track_id << std::endl;
+  }
+
+}
+
+// ----------------------------------------------------------------------------
 std::shared_ptr<source_base> player::find_source(const std::string& source_name)
 {
   auto promise = std::make_shared<std::promise<std::shared_ptr<source_base>>>();

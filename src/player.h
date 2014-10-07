@@ -81,6 +81,8 @@ public:
   json::value database_export_tracks();
   json::value database_import_tracks(json::array tracks);
 public:
+  void database_update_track_source(int track_id, json::object source_json);
+public:
   std::shared_ptr<source_base> find_source(const std::string& source_name);
 public:
   void set_continuous_playback(json::object value);

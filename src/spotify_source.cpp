@@ -151,6 +151,8 @@ private:
 spotify_source::spotify_source(const spotify_source_config& config)
   :
   track_(nullptr),
+  track_playing_(false),
+  track_loading_(false),
   config_(config),
   running_(true),
   command_queue_(),
@@ -284,9 +286,8 @@ void spotify_source::play_handler(const std::string& uri, std::weak_ptr<audio_ou
     {
       sp_track_add_ref(track_ = sp_link_as_track(link));
 
-      sp_error err = sp_track_error(track_);
-
-      if (err == SP_ERROR_OK) {
+      track_loading_ = true;
+      if (sp_track_error(track_) == SP_ERROR_OK) {
         track_loaded_handler();
       }
     }
@@ -327,7 +328,7 @@ void spotify_source::stop_handler()
 // ----------------------------------------------------------------------------
 void spotify_source::track_loaded_handler()
 {
-  if ( !track_playing_ && track_ )
+  if ( track_loading_ )
   {
     sp_error err;
 
@@ -338,6 +339,8 @@ void spotify_source::track_loaded_handler()
     if ( (err=sp_session_player_play(session_, 1)) != SP_ERROR_OK ) {
       //_log_(error) << "sp_session_player_play error " << err;
     }
+
+    track_loading_ = false;
   }
 }
 
@@ -397,11 +400,13 @@ inline void spotify_source::metadata_updated_cb(sp_session *session)
 // ----------------------------------------------------------------------------
 void spotify_source::connection_error_cb(sp_session *session, sp_error error)
 {
+  std::cerr << "spotify source - connection error" << std::endl;
 }
 
 // ----------------------------------------------------------------------------
 void spotify_source::message_to_user_cb(sp_session *session, const char* message)
 {
+  std::cerr << "spotify source - message to user " << message << std::endl;
 }
 
 // ----------------------------------------------------------------------------
@@ -419,10 +424,11 @@ int spotify_source::music_delivery(sp_session *session, const sp_audioformat *fo
   if ( !self->audio_output_.expired() )
   {
     auto audio_output = self->audio_output_.lock();
-    if ( audio_output->sample_rate() != static_cast<unsigned>(format->sample_rate) )
-    {
+
+    if ( audio_output->sample_rate() != static_cast<unsigned>(format->sample_rate) ) {
       audio_output->set_sample_rate(format->sample_rate);
     }
+
     audio_output->write_s16_le_i(frames, num_frames);
   }
   else
@@ -436,6 +442,7 @@ int spotify_source::music_delivery(sp_session *session, const sp_audioformat *fo
 // ----------------------------------------------------------------------------
 void spotify_source::play_token_lost_cb(sp_session *session)
 {
+  std::cerr << "spotify source - play token lost" << std::endl;
 }
 
 // ----------------------------------------------------------------------------
@@ -448,12 +455,14 @@ void spotify_source::end_of_track_cb(sp_session *session)
 {
   std::cerr << "spotify source - end_of_track_cb" << std::endl;
   auto self = reinterpret_cast<spotify_source*>(sp_session_userdata(session));
+
   self->command_queue_.push(std::bind(&spotify_source::stop_handler, self));
 }
 
 // ----------------------------------------------------------------------------
 void spotify_source::stream_error_cb(sp_session *session, sp_error error)
 {
+  std::cerr << "spotify source - stream error " << error << std::endl;
 }
 
 // ----------------------------------------------------------------------------
@@ -497,11 +506,13 @@ void spotify_source::get_audio_buffer_stats_cb(sp_session *session, sp_audio_buf
 // ----------------------------------------------------------------------------
 void spotify_source::offline_status_updated_cb(sp_session *session)
 {
+  std::cerr << "spotify source - offline status update" << std::endl;
 }
 
 // ----------------------------------------------------------------------------
 void spotify_source::offline_error_cb(sp_session *session, sp_error error)
 {
+  std::cerr << "spotify source - offline error " << error << std::endl;
 }
 
 // ----------------------------------------------------------------------------

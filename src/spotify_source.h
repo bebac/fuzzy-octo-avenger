@@ -103,6 +103,7 @@ private:
 private:
   sp_track*             track_;
   std::atomic<bool>     track_playing_;
+  std::atomic<bool>     track_loading_;
   audio_output_ptr      audio_output_;
 private:
   spotify_source_config config_;

@@ -300,7 +300,15 @@ json::array local_source::scan() const
 
           for ( auto& field : field_map )
           {
-            if ( field.first == "REPLAYGAIN_REFERENCE_LOUDNESS" )
+            if ( field.first == "TRACK NUMBER" )
+            {
+              track["tn"] = std::stoi(field.second[0].to8Bit());
+            }
+            else if ( field.first == "DISC NUMBER" )
+            {
+              track["dn"] = std::stoi(field.second[0].to8Bit());
+            }
+            else if ( field.first == "REPLAYGAIN_REFERENCE_LOUDNESS" )
             {
               auto ref_loudness = std::stod(field.second[0].to8Bit());
               replaygain["reference_loudness"] = ref_loudness;

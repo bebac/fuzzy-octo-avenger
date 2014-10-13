@@ -229,7 +229,7 @@ private:
       queued_frames_ -= frames;
     }
   }
-private:
+public:
   unsigned gain_factor()
   {
     if ( replaygain_ > -3 ) {
@@ -268,7 +268,7 @@ private:
   std::atomic<unsigned> sample_rate_;
   std::atomic<int>      queued_frames_;
   std::string           device_name_;
-  double                replaygain_;
+  std::atomic<double>   replaygain_;
 private:
   std::atomic<bool>     running_;
   cmdque_t              command_queue_;

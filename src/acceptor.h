@@ -52,6 +52,12 @@ namespace jsonrpc
         set_rd_handler(std::bind(&acceptor::accept_handler, this));
      }
     protected:
+      virtual void stopped(dripcore::loop* loop)
+      {
+        socket_.close();
+        dripcore::eventable::stopped(loop);
+      }
+    protected:
       void accept_handler()
       {
         bool done = false;

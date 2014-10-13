@@ -50,6 +50,7 @@ spec = Rake::ExecutableSpecification.new do |s|
     s.includes.add %w(
         src
         lib/json/include
+        lib/dripcore/include
         test/catch
     )
     s.libincludes.add %w(

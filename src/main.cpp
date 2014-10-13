@@ -63,22 +63,22 @@ void print_usage(const options& options)
 }
 
 // ----------------------------------------------------------------------------
-std::unique_ptr<player> player_;
+std::unique_ptr<dripcore::loop> loop_;
 
 // ----------------------------------------------------------------------------
 void sig_handler(int signum)
 {
   std::cerr << "got signal " << signum << std::endl;
-  player_->shutdown();
+  loop_->shutdown();
 }
 
 // ----------------------------------------------------------------------------
 void run(const options& options)
 {
-  dripcore::loop   loop;
-  jsonrpc::service service(loop);
+  loop_.reset(new dripcore::loop);
 
-  player_.reset(new player(options.audio_device));
+  jsonrpc::service service(*loop_);
+  player           player(options.audio_device);
 
   if ( signal(SIGPIPE, sig_handler) == SIG_ERR ) {
     std::cerr << "Error installing SIGPIPE handler!" << std::endl;
@@ -94,31 +94,31 @@ void run(const options& options)
 
   spotify_source_config sp_cfg{
     options.spotify_username,
-    options.spotify_password
+    options.spotify_password,
   };
 
-  player_->add_source("spotify", std::make_shared<spotify_source>(sp_cfg));
+  player.add_source("spotify", std::make_shared<spotify_source>(sp_cfg));
 
   if ( options.local_source_dirs.size() > 0 )
   {
-    player_->add_source("local", std::make_shared<local_source>(options.local_source_dirs[0]));
+    player.add_source("local", std::make_shared<local_source>(options.local_source_dirs[0]));
   }
 
   using std::placeholders::_1;
-  service.add_method("player/play",      std::bind(&json_rpc::play,                std::ref(*player_), _1));
-  service.add_method("player/queue",     std::bind(&json_rpc::queue,               std::ref(*player_), _1));
-  service.add_method("player/skip",      std::bind(&json_rpc::skip,                std::ref(*player_), _1));
-  service.add_method("player/stop",      std::bind(&json_rpc::stop,                std::ref(*player_), _1));
-  service.add_method("player/state",     std::bind(&json_rpc::state,               std::ref(*player_), _1));
-  service.add_method("player/cover",     std::bind(&json_rpc::cover,               std::ref(*player_), _1));
-  service.add_method("player/ctpb",      std::bind(&json_rpc::continuous_playback, std::ref(*player_), _1));
-  service.add_method("db/index",         std::bind(&json_rpc::index,               std::ref(*player_), _1));
-  service.add_method("db/save",          std::bind(&json_rpc::save,                std::ref(*player_), _1));
-  service.add_method("db/delete",        std::bind(&json_rpc::erase,               std::ref(*player_), _1));
-  service.add_method("db/tags",          std::bind(&json_rpc::tags,                std::ref(*player_), _1));
-  service.add_method("db/export-tracks", std::bind(&json_rpc::export_tracks,       std::ref(*player_), _1));
-  service.add_method("db/import-tracks", std::bind(&json_rpc::import_tracks,       std::ref(*player_), _1));
-  service.add_method("local/scan",       std::bind(&json_rpc::local_scan,          std::ref(*player_), _1));
+  service.add_method("player/play",      std::bind(&json_rpc::play,                std::ref(player), _1));
+  service.add_method("player/queue",     std::bind(&json_rpc::queue,               std::ref(player), _1));
+  service.add_method("player/skip",      std::bind(&json_rpc::skip,                std::ref(player), _1));
+  service.add_method("player/stop",      std::bind(&json_rpc::stop,                std::ref(player), _1));
+  service.add_method("player/state",     std::bind(&json_rpc::state,               std::ref(player), _1));
+  service.add_method("player/cover",     std::bind(&json_rpc::cover,               std::ref(player), _1));
+  service.add_method("player/ctpb",      std::bind(&json_rpc::continuous_playback, std::ref(player), _1));
+  service.add_method("db/index",         std::bind(&json_rpc::index,               std::ref(player), _1));
+  service.add_method("db/save",          std::bind(&json_rpc::save,                std::ref(player), _1));
+  service.add_method("db/delete",        std::bind(&json_rpc::erase,               std::ref(player), _1));
+  service.add_method("db/tags",          std::bind(&json_rpc::tags,                std::ref(player), _1));
+  service.add_method("db/export-tracks", std::bind(&json_rpc::export_tracks,       std::ref(player), _1));
+  service.add_method("db/import-tracks", std::bind(&json_rpc::import_tracks,       std::ref(player), _1));
+  service.add_method("local/scan",       std::bind(&json_rpc::local_scan,          std::ref(player), _1));
 
   /////
   // Setup callback to get player state info. Note that the callback is
@@ -126,7 +126,7 @@ void run(const options& options)
   // will push a send notifition for each connection to be executed in dripcore
   // context.
   //
-  player_->set_state_info_callback([&](const player_state_info& info)
+  player.set_state_info_callback([&](const player_state_info& info)
   {
     json::object params
     {
@@ -139,11 +139,15 @@ void run(const options& options)
   });
 
   auto acceptor = std::make_shared<jsonrpc::server::acceptor>([&](basic_socket client) {
-      loop.start(std::make_shared<jsonrpc::server::connection>(service, std::move(client)));
+      loop_->start(std::make_shared<jsonrpc::server::connection>(service, std::move(client)));
     });
 
-  loop.start(acceptor);
-  loop.run();
+  loop_->start(acceptor);
+  loop_->run();
+
+  std::cerr << "shutdown player!" << std::endl;
+
+  player.shutdown();
 }
 
 // ----------------------------------------------------------------------------

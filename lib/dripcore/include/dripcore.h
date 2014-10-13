@@ -21,6 +21,8 @@
 
 // ----------------------------------------------------------------------------
 #include <sys/epoll.h>
+#include <sys/eventfd.h>
+#include <unistd.h>
 #include <fcntl.h>
 
 // ----------------------------------------------------------------------------
@@ -106,7 +108,7 @@ namespace dripcore
       assert(loop_);
       return *loop_;
     }
-  protected:
+  public:
     void stop();
   private:
     void call_rd_handler()
@@ -126,6 +128,35 @@ namespace dripcore
     handler_callback wr_handler_;
   private:
     std::shared_ptr<event_data> event_data_;
+  };
+
+  class shutdown_eventable : public dripcore::eventable
+  {
+  public:
+    shutdown_eventable()
+    {
+      if ( (fd_ = eventfd(0, 0)) == -1 ) {
+        throw std::system_error(errno, std::system_category());
+      }
+      set_rd_handler(std::bind(&shutdown_eventable::read_handler, this));
+    }
+  public:
+    void read_handler();
+  public:
+    void notify()
+    {
+      uint64_t v = 1;
+      if ( write(fd_, &v, sizeof(uint64_t)) < 0 ) {
+        throw std::system_error(errno, std::system_category());
+      }
+    }
+  public:
+    int get_os_handle() const
+    {
+      return fd_;
+    }
+  private:
+    int fd_;
   };
 
   class loop
@@ -172,13 +203,23 @@ namespace dripcore
       eventables_.erase(eventable);
     }
   public:
+    void stop_all_eventables()
+    {
+      for ( auto& eventable : eventables_ ) {
+        stop(eventable);
+      }
+    }
+  public:
     void run()
     {
       struct epoll_event events[10];
 
-      while(1)
+      // Create and start shutdown eventable.
+      start( (shutdown_ = std::make_shared<shutdown_eventable>()) );
+
+      while( eventables_.size() > 1 )
       {
-        int nfds = epoll_wait(os_handle_, events, 10, -1);
+        int nfds = epoll_wait(os_handle_, events, 10, 1000);
 
         if ( nfds < 0 )
         {
@@ -195,14 +236,25 @@ namespace dripcore
         }
       }
     }
+  public:
+    void shutdown()
+    {
+      shutdown_->notify();
+    }
   private:
-    os_handle_t os_handle_;
+    os_handle_t                          os_handle_;
     std::set<std::shared_ptr<eventable>> eventables_;
+    std::shared_ptr<shutdown_eventable>  shutdown_;
   };
 
   inline void eventable::stop()
   {
     get_loop().stop(ptr());
+  }
+
+  inline void shutdown_eventable::read_handler()
+  {
+    get_loop().stop_all_eventables();
   }
 
   inline void event_data::dispatch(loop& loop, unsigned events)

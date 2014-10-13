@@ -221,18 +221,20 @@ namespace dripcore
       {
         int nfds = epoll_wait(os_handle_, events, 10, 1000);
 
-        if ( nfds < 0 )
+        if ( nfds < 0 && errno != EINTR )
         {
           throw std::system_error(errno, std::system_category());
         }
-
-        for ( int i=0; i<nfds; ++i )
+        else if ( nfds > 0 )
         {
+          for ( int i=0; i<nfds; ++i )
+          {
             auto event = reinterpret_cast<event_data *>(events[i].data.ptr);
             if ( event )
             {
                 event->dispatch(*this, events[i].events);
             }
+          }
         }
       }
     }

@@ -45,7 +45,8 @@ module TestApp
     end
 
     post '/api/tags' do
-      Player.call("db/save", { "id" => params['id'].to_i, "tags" => params['tags'] }, env)
+      tags = params['tags'] || []
+      Player.call("db/save", { "id" => params['id'].to_i, "tags" => tags }, env)
     end
 
     post '/api/play' do

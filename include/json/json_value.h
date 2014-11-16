@@ -160,7 +160,7 @@ inline std::ostream& operator<<(std::ostream& os, const json::value& v)
 }
 
 // ----------------------------------------------------------------------------
-inline std::string to_string(const json::object& value)
+inline std::string to_string(const json::value& value)
 {
   std::stringstream os;
   os << value;

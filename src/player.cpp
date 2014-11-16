@@ -20,26 +20,47 @@ static const std::string stopped = "stopped";
 static const std::string playing = "playing";
 
 // ----------------------------------------------------------------------------
+player_ctbp_selector::player_ctbp_selector()
+  :
+  rd_(),
+  re_(rd_()),
+  track_ids_()
+{
+}
+
+// ----------------------------------------------------------------------------
+void player_ctbp_selector::init()
+{
+  dm::track::each([&](dm::track& track) -> bool
+  {
+    track_ids_.push_back(track.id());
+    return true;
+  });
+}
+
+// ----------------------------------------------------------------------------
+dm::track player_ctbp_selector::next()
+{
+  distribution dist(0, track_ids_.size()-1);
+
+  auto track = dm::track::find_by_id(track_ids_[dist(re_)]);
+
+  return std::move(track);
+}
+
+// ----------------------------------------------------------------------------
 player::player(const std::string& audio_device)
   :
-  db_(),
   audio_device_(audio_device),
   audio_output_(),
   play_queue_(),
   continuous_playback_(true),
-  state_{stopped, nullptr},
+  ctpb_selector_(),
+  state_{stopped},
   running_(true),
   command_queue_(),
   thr_{&player::loop, this}
 {
-  try
-  {
-    db_.load("index.json");
-  }
-  catch(const std::exception& err)
-  {
-    std::cerr << "faild to load index : " << err.what() << std::endl;
-  }
 }
 
 // ----------------------------------------------------------------------------
@@ -49,15 +70,22 @@ player::~player()
   thr_.join();
 }
 
+// ----------------------------------------------------------------------------
 void player::shutdown()
 {
   command_queue_.push([=]()
   {
-    // Save index.
-    db_.save("index.json");
     // Request thread to stop.
     running_ = false;
   });
+}
+
+// ----------------------------------------------------------------------------
+int player::queue(dm::track track)
+{
+  auto promise = std::make_shared<std::promise<int>>();
+  command_queue_.push(std::bind(&player::queue_handler, this, std::move(track), promise));
+  return promise->get_future().get();
 }
 
 // ----------------------------------------------------------------------------
@@ -66,52 +94,44 @@ std::string player::play()
   auto promise = std::make_shared<std::promise<std::string>>();
   command_queue_.push([=]()
   {
-    if ( !play_queue_.empty() )
+    if ( state_.state == stopped )
     {
-      if ( state_.state == stopped ) {
+      if ( !play_queue_.empty() )
+      {
         play_from_queue();
+        promise->set_value("ok");
       }
-      promise->set_value("");
-    }
-    else {
-      promise->set_value("queue is empty");
+      else if ( continuous_playback_ )
+      {
+        play_queue_.push(ctpb_selector_.next());
+        play_from_queue();
+        promise->set_value("ok");
+      }
+      else
+      {
+        promise->set_value("queue is empty");
+      }
     }
   });
   return promise->get_future().get();
 }
 
 // ----------------------------------------------------------------------------
+#if 0
 int player::play(int id, const std::string& source_name)
 {
   auto promise = std::make_shared<std::promise<int>>();
   command_queue_.push(std::bind(&player::play_id_handler, this, id, source_name, promise));
   return promise->get_future().get();
 }
-
-// ----------------------------------------------------------------------------
-#if 0
-int player::play(track_ptr track)
-{
-  auto promise = std::make_shared<std::promise<int>>();
-  command_queue_.push(std::bind(&player::play_track_handler, this, track, promise));
-  return promise->get_future().get();
-}
 #endif
 
 // ----------------------------------------------------------------------------
+#if 0
 int player::queue(int id, const std::string& source_name)
 {
   auto promise = std::make_shared<std::promise<int>>();
   command_queue_.push(std::bind(&player::queue_id_handler, this, id, source_name, promise));
-  return promise->get_future().get();
-}
-
-// ----------------------------------------------------------------------------
-#if 0
-int player::queue(track_ptr track)
-{
-  auto promise = std::make_shared<std::promise<int>>();
-  command_queue_.push(std::bind(&player::queue_track_handler, this, track, promise));
   return promise->get_future().get();
 }
 #endif
@@ -146,106 +166,6 @@ player_state_info player::get_state_info() const
     promise->set_value(state_);
   });
   return promise->get_future().get();
-}
-
-// ----------------------------------------------------------------------------
-json::value player::get_cover_by_album_id(int album_id) const
-{
-  auto promise = std::make_shared<std::promise<json::value>>();
-  command_queue_.push(std::bind(&player::get_cover_by_album_id_handler, this, album_id, promise));
-  return promise->get_future().get();
-}
-
-// ----------------------------------------------------------------------------
-json::value player::get_cover_by_track_id(int track_id) const
-{
-  auto promise = std::make_shared<std::promise<json::value>>();
-  command_queue_.push([=]()
-  {
-    auto track = db_.find_track(track_id);
-
-    if ( track )
-    {
-      get_cover_by_album_id_handler(track->album_id(), promise);
-    }
-    else {
-      promise->set_value(json::value("track not found"));
-    }
-  });
-  return promise->get_future().get();
-}
-
-// ----------------------------------------------------------------------------
-json::value player::database_index()
-{
-  auto promise = std::make_shared<std::promise<json::value>>();
-  command_queue_.push(std::bind(&player::database_index_handler, this, promise));
-  return promise->get_future().get();
-}
-
-// ----------------------------------------------------------------------------
-json::value player::database_save(json::object track_json)
-{
-  auto promise = std::make_shared<std::promise<json::value>>();
-  command_queue_.push(std::bind(&player::database_save_handler, this, std::move(track_json), promise));
-  return promise->get_future().get();
-}
-
-// ----------------------------------------------------------------------------
-std::string player::database_delete_track(int track_id)
-{
-  auto promise = std::make_shared<std::promise<std::string>>();
-  command_queue_.push(std::bind(&player::database_delete_track_handler, this, track_id, promise));
-  return promise->get_future().get();
-}
-
-// ----------------------------------------------------------------------------
-std::string player::database_delete_album(int album_id)
-{
-  auto promise = std::make_shared<std::promise<std::string>>();
-  command_queue_.push(std::bind(&player::database_delete_album_handler, this, album_id, promise));
-  return promise->get_future().get();
-}
-
-// ----------------------------------------------------------------------------
-json::value player::database_tags()
-{
-  auto promise = std::make_shared<std::promise<json::value>>();
-  command_queue_.push(std::bind(&player::database_tags_handler, this, promise));
-  return promise->get_future().get();
-}
-
-// ----------------------------------------------------------------------------
-json::value player::database_export_tracks()
-{
-  auto promise = std::make_shared<std::promise<json::value>>();
-  command_queue_.push(std::bind(&player::database_export_tracks_handler, this, promise));
-  return promise->get_future().get();
-}
-
-// ----------------------------------------------------------------------------
-json::value player::database_import_tracks(json::array tracks)
-{
-  auto promise = std::make_shared<std::promise<json::value>>();
-  command_queue_.push(std::bind(&player::database_import_tracks_handler, this, tracks, promise));
-  return promise->get_future().get();
-}
-
-// ----------------------------------------------------------------------------
-void player::database_update_track_source(int track_id, json::object source_json)
-{
-  auto track = db_.find_track(track_id);
-
-  if ( track )
-  {
-    track->source_add(source_json);
-    std::cerr << "player::database_update_track_source " << to_json(*track) << std::endl;
-  }
-  else
-  {
-    std::cerr << "player::database_update_track_source - track not found id=" << track_id << std::endl;
-  }
-
 }
 
 // ----------------------------------------------------------------------------
@@ -296,6 +216,7 @@ void player::set_continuous_playback(json::object value)
 // ----------------------------------------------------------------------------
 void player::init()
 {
+  ctpb_selector_.init();
 }
 
 // ----------------------------------------------------------------------------
@@ -306,15 +227,18 @@ void player::loop()
   {
     auto cmd = command_queue_.pop(std::chrono::seconds(5), [this]
       {
+#if 0
         if ( continuous_playback_ ) {
           queue_continuous_playback_tracks();
         }
+#endif
       });
     cmd();
   }
 }
 
 // ----------------------------------------------------------------------------
+#if 0
 void player::play_id_handler(int id, const std::string& source_name, std::shared_ptr<std::promise<int>> promise)
 {
   auto track = db_.find_track(id);
@@ -344,6 +268,7 @@ void player::play_id_handler(int id, const std::string& source_name, std::shared
     promise->set_value(player_status_track_not_found);
   }
 }
+#endif
 
 // ----------------------------------------------------------------------------
 #if 0
@@ -365,6 +290,7 @@ void player::play_track_handler(track_ptr track, std::shared_ptr<std::promise<in
 #endif
 
 // ----------------------------------------------------------------------------
+#if 0
 void player::queue_id_handler(int id, const std::string& source_name, std::shared_ptr<std::promise<int>> promise)
 {
   auto track = db_.find_track(id);
@@ -383,126 +309,16 @@ void player::queue_id_handler(int id, const std::string& source_name, std::share
     promise->set_value(-1);
   }
 }
-
-// ----------------------------------------------------------------------------
-#if 0
-void player::queue_track_handler(track_ptr track, std::shared_ptr<std::promise<int>> promise)
-{
-  if ( track )
-  {
-    promise->set_value(player_status_ok);
-    play_queue_.push(track);
-  }
-  else
-  {
-    promise->set_value(player_status_track_not_found);
-  }
-}
 #endif
 
 // ----------------------------------------------------------------------------
-void player::get_cover_by_album_id_handler(int album_id, std::shared_ptr<std::promise<json::value>> promise) const
+void player::queue_handler(dm::track track, std::shared_ptr<std::promise<int>> promise)
 {
-  auto album = db_.find_album(album_id);
+  promise->set_value(play_queue_.push(std::move(track)));
 
-  if ( album )
-  {
-    json::value result;
-    json::value cover = album->cover();
-
-    if ( cover.is_null() )
-    {
-      for ( auto& source : sources_ )
-      {
-        auto id = album->find_id(source.first);
-
-        if ( !id.empty() ) {
-          cover = source.second->get_cover(id);
-        }
-      }
-    }
-
-    if ( cover.is_null() ) {
-      cover = json::value("cover not found");
-    }
-
-    promise->set_value(std::move(cover));
+  if ( state_.state == stopped ) {
+    play_from_queue();
   }
-  else {
-    promise->set_value(json::value("album not found"));
-  }
-}
-
-// ----------------------------------------------------------------------------
-void player::database_index_handler(std::shared_ptr<std::promise<json::value>> promise)
-{
-  promise->set_value(to_json(db_));
-}
-
-// ----------------------------------------------------------------------------
-void player::database_save_handler(json::object track_json, std::shared_ptr<std::promise<json::value>> promise)
-{
-  std::cerr << "database_save_handler track=" << track_json << std::endl;
-
-  auto track = db_.save(std::move(track_json));
-
-  promise->set_value(to_json(*track));
-}
-
-// ----------------------------------------------------------------------------
-void player::database_delete_track_handler(int id, std::shared_ptr<std::promise<std::string>> promise)
-{
-  std::cerr << "database_delete_track_handler track_id=" << id << std::endl;
-
-  auto track = db_.find_track(id);
-
-  if ( track )
-  {
-    db_.delete_track(track);
-    promise->set_value("");
-  }
-  else
-  {
-    promise->set_value("track not found");
-  }
-}
-
-// ----------------------------------------------------------------------------
-void player::database_delete_album_handler(int id, std::shared_ptr<std::promise<std::string>> promise)
-{
-  std::cerr << "database_delete_album_handler album_id=" << id << std::endl;
-
-  auto album = db_.find_album(id);
-
-  if ( album )
-  {
-    db_.delete_album(album);
-    promise->set_value("");
-  }
-  else
-  {
-    promise->set_value("album not found");
-  }
-}
-
-// ----------------------------------------------------------------------------
-void player::database_tags_handler(std::shared_ptr<std::promise<json::value>> promise)
-{
-  promise->set_value(db_.tags());
-}
-
-// ----------------------------------------------------------------------------
-void player::database_export_tracks_handler(std::shared_ptr<std::promise<json::value>> promise)
-{
-  promise->set_value(db_.export_tracks());
-}
-
-// ----------------------------------------------------------------------------
-void player::database_import_tracks_handler(json::array tracks, std::shared_ptr<std::promise<json::value>> promise)
-{
-  db_.import_tracks(std::move(tracks));
-
-  promise->set_value(json::value(0));
 }
 
 // ----------------------------------------------------------------------------
@@ -537,7 +353,7 @@ void player::play_stop()
       state_info_cb_(state_);
     }
 
-    state_.track.reset();
+    state_.track = dm::track();
     state_.source = std::string();
   }
 }
@@ -548,10 +364,12 @@ void player::play_from_queue()
   if ( play_queue_.size() > 0 )
   {
     auto track = play_queue_.front();
-    auto src   = track->find_source("");
+    auto src   = track.find_source();
+
+    std::cerr << "play_from_queue title=" << track.title() << " source=" << src.name() << std::endl;
 
     state_.track  = track;
-    state_.source = src.name;
+    state_.source = src.name();
 
     if ( !audio_output_ ) {
       open_audio_output();
@@ -560,6 +378,11 @@ void player::play_from_queue()
     source_play(src);
 
     play_queue_.pop();
+  }
+  else if ( continuous_playback_ )
+  {
+    play_queue_.push(ctpb_selector_.next());
+    play_from_queue();
   }
   else
   {
@@ -588,22 +411,23 @@ void player::close_audio_output()
 }
 
 // ----------------------------------------------------------------------------
-void player::source_play(const track_source& source)
+void player::source_play(const dm::track_source& source)
 {
-  auto it = sources_.find(source.name);
+  auto it = sources_.find(source.name());
   if ( it != end(sources_) )
   {
-    (*it).second->play(source.uri, audio_output_);
+    (*it).second->play(source.uri(), audio_output_);
   }
   else
   {
-    std::cerr << "no source found! source=" << source.name << std::endl;
+    std::cerr << "no source found! source=" << source.name() << std::endl;
   }
 }
 
 // ----------------------------------------------------------------------------
 void player::queue_continuous_playback_tracks()
 {
+#if 0
   if ( continuous_playback_ && play_queue_.size() < 3 )
   {
     std::vector<database::track_ptr> tracks;
@@ -640,4 +464,5 @@ void player::queue_continuous_playback_tracks()
       tracks.pop_back();
     }
   }
+#endif
 }

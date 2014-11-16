@@ -1,25 +1,13 @@
 require 'open-uri'
 require 'json'
 require 'ostruct'
+require 'base64'
 
 require_relative './em-spotihifi-client'
 
 module Spotify
 
   class Track < OpenStruct
-
-    def artists
-      super.collect { |a| OpenStruct.new(a) }
-    end
-
-    def track_number
-      send(:"track-number").to_i
-    end
-
-    def disc_number
-      send(:"disc-number").to_i
-    end
-
   end
 
   class Album < OpenStruct
@@ -38,10 +26,9 @@ module Spotify
       end
     end
 
-    def tracks
-      super.collect { |t| Track.new(t) }
-    end
+  end
 
+  class Artist < OpenStruct
   end
 
   class AlbumImporter
@@ -52,34 +39,54 @@ module Spotify
 
     def import(uri)
       lookup_album(uri) do |album|
-        album.tracks.each do |t|
-          track = {
-            :title    => t.name,
-            :artist   => album.artist,
-            :album    => { :title => album.name, :ids => { :upc => album.upc, :spotify => uri } },
-            :tn       => t.track_number,
-            :dn       => t.disc_number,
-            :duration => t.length,
-            :sources  => [ { :name => "spotify", :uri => t.href } ]
-          }
-          save_track(track)
-        end
       end
     end
 
-    def lookup_album(uri, &blk)
-      open("http://ws.spotify.com/lookup/1/.json?uri=#{uri}&extras=trackdetail") { |f|
-        json = JSON.parse(f.read)
-        yield Album.new(json['album'])
+    def load_cover(uri)
+      cover = Hash.new
+      open(uri) { |f|
+        cover["image_data"]   = Base64.encode64(f.read)
+        cover["image_format"] = "jpg"
       }
+      return cover
+    end
+
+    def lookup_album(uri, &blk)
+      tracks = []
+      open("https://api.spotify.com/v1/albums/#{uri}") { |f|
+        json  = JSON.parse(f.read)
+
+        album  = Album.new(json)
+        artist = Artist.new(album.artists[0])
+        cover  = load_cover(album.images[0]["url"])
+
+        album.tracks["items"].each do |item|
+          track = Track.new(item)
+
+          track_json = {
+            :title    => track.name,
+            :artist   => { :name => artist.name },
+            :album    => { :title => album.name },
+            :tn       => track.track_number,
+            :dn       => track.disc_number,
+            :duration => track.duration_ms/1000,
+            :source   => { :name => "spotify", :uri => track.uri },
+            :cover    => cover
+          }
+
+          tracks << track_json
+        end
+      }
+      fail("tracks is empty") if tracks.empty?
+      save_track(tracks)
     end
 
     def save_track(track)
       EventMachine.run {
-        client = EventMachine::connect @ip, 1100, SpotiHifi::Client, @ip, 1100
+        client = EventMachine::connect @ip, 8212, SpotiHifi::Client, @ip, 8212
 
-        client.invoke("db/save", track) do |req|
-          req.timeout 2
+        client.invoke("db/import-tracks", track) do |req|
+          req.timeout 60
 
           req.callback do |result|
             p result

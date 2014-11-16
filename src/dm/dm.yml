@@ -1,0 +1,6 @@
+--- !library
+    name: mbox_dm
+    sources:
+        - ./*.cpp
+    includes:
+        - ../../lib/json/include

@@ -8,47 +8,32 @@
 
 <body>
 
-  <div id="now-playing-container">
-    <div id="now-playing"></div>
-    <div id="controls"></div>
+  <div id="top">
+    <a href="albums">albums</a>
   </div>
 
-  <script type="text/template" id="album-details-view">
-    <div>
-      <div class="cover">
-        <img src="<%%= cover_path %>">
+  <script type="text/template" id="now-playing-view">
+    <div id="now-playing-container" class="clear">
+      <div id="now-playing-track">
+        <p><b><%%= track.title %></b> &bull; <%%= track.artist.name %> &bull; <%%= track.album.title %></p>
       </div>
-      <h1><%%= title %></h1>
-      <h2><%%= artist %></h2>
-      <hr>
-      <ol class="track-list">
-      </ol>
+      <div id="now-playing-cover">
+        <img src="api/cover?album_id=<%%= track.album.id %>"
+      </div>
     </div>
   </script>
 
-  <div id="album-details-container" class="hidden">
-    <div id="album-details">
+  <div id="player">
+    <div id="now-playing"></div>
+  </div>
+
+  <div id="control">
+    <div id="control-container">
+      <img src="assets/stop.png">
     </div>
   </div>
 
-  <div id="albums-view-container">
-    <div id="albums-view">
-      <script type="text/template" id="album-view">
-        <div class="album">
-          <div class="title-wrap">
-            <div class="title">
-              <p><%%= title %></p>
-            </div>
-          </div>
-          <div class="cover">
-            <img src="<%%= cover_path %>">
-          </div>
-          <div class="artist">
-            <%%= artist %>
-          </div>
-        </div>
-      </script>
-    </div>
+  <div id="bottom">
   </div>
 
 </body>

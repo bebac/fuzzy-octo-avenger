@@ -4,7 +4,7 @@ namespace :player do
 
   def spotihifi_call(ip, method, params=nil)
     EventMachine.run {
-      client = EventMachine::connect ip, 1100, SpotiHifi::Client, ip, 1100
+      client = EventMachine::connect ip, 8212, SpotiHifi::Client, ip, 8212
 
       client.invoke(method, params) do |req|
         req.timeout 2

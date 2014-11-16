@@ -40,7 +40,7 @@ namespace jsonrpc
         std::memset(&sock_addr, 0, sizeof(sock_addr));
 
         sock_addr.sin_family = AF_INET;
-        sock_addr.sin_port = htons(1100);
+        sock_addr.sin_port = htons(8212);
         sock_addr.sin_addr.s_addr = htonl(INADDR_ANY);
 
         socket_.nonblocking(true);

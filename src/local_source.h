@@ -13,7 +13,6 @@
 #define __local_source_h__
 
 // ----------------------------------------------------------------------------
-#include "database.h"
 #include "audio_output_alsa.h"
 #include "source_base.h"
 
@@ -58,16 +57,12 @@ public:
   virtual void play(const std::string& uri, audio_output_ptr audio_output);
 public:
   json::value get_cover(const std::string& uri);
-public:
-  bool is_scanable() const
-  {
-    return true;
-  }
-public:
-  virtual json::array scan() const;
 private:
   std::string dirname_;
 };
+
+// ----------------------------------------------------------------------------
+void import_flac_file(const std::string& filename);
 
 // ----------------------------------------------------------------------------
 #endif // __local_source_h__

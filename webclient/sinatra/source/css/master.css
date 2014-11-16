@@ -17,38 +17,75 @@ body, input {
     clear: both;
 }
 
-/*
- * Top panel
- */
+#top {
+    height: 80px;
+    background: #B1B0B0;
+}
 
-#now-playing-container {
-    position: fixed;
-    width: 100%;
-    background-color: #555;
+#player {
+}
+
+#control {
+    background: #eee;
+    height: 200px;
+}
+
+#control-container img {
+    padding: 1em 0 1em 0;
+    display: table;
+    margin: auto;
+    opacity: 0.5;
+}
+
+#control-container img:hover {
+    opacity: 1;
+}
+
+#bottom {
+    background: #eee;
+    height: 200px;
 }
 
 #now-playing {
-    margin: 0.5em auto 0.5em auto;
-    /*margin: 0.5em;*/
-    /*float: left;*/
-    color: #ccc;
+    /*background: #818181;*/
+    background: #B1B0B0;
+    max-height: 500px;
+}
+
+#now-playing-container {
+    display: table;
+    /*margin: auto;*/
+    width: 100%;
+}
+
+#now-playing-track {
+    position: relative;
     text-align: center;
+    color: #B1B0B0;
+    font-size: 2em;
+    /*height: 2em;*/
+    z-index: 10;
+    top: 0px;
+    background: rgba(64,64,64,0.8);
+    /*opacity: 0.2;*/
 }
 
-#controls {
-    margin: 0.5em 0.5em 0.5em 0.5em;
-    /*margin: 0.5em;*/
-    color: #bbb;
-    /*float: right;*/
-    text-align: center;
+#now-playing-track p {
+    padding: 0.33em 0 0.33em 0;
 }
 
-#play_or_stop_action {
-    display: inline-block;
+#now-playing-cover {
+    position: relative;
+    top: -3.66em;
 }
 
-#skip_action {
-    display: inline-block;
+#now-playing-cover img {
+    display: table;
+    /*max-width: 500px;*/
+    /*min-width: 500px;*/
+    min-height: 500px;
+    max-height: 500px;
+    margin: auto;
 }
 
 /*
@@ -56,27 +93,27 @@ body, input {
  */
 
 #albums-view-container {
-    padding-top: 4em;
 }
 
 #albums-view {
-    width: 80%;
     margin: 0px auto;
+    text-align: center;
 }
 
-#albums-view div {
-    list-style-type: none;
+#albums-view > div {
+    display: inline-block;
 }
 
 .album {
     color: #555;
-    float: left;
+    width: 200px;
     margin: 1.66em;
     background-color: #f1f1f1;
 }
 
-.title-wrap {
+.album .title-wrap {
     max-height: 2.66em;
+    min-height: 2.66em;
     overflow: hidden;
 }
 
@@ -85,7 +122,6 @@ body, input {
     height: 2.66em;
     display: table-cell;
     vertical-align: middle;
-    text-align: center;
 }
 
 .album .cover {
@@ -96,6 +132,7 @@ body, input {
 .album .cover img {
     max-width: 200px;
     min-width: 200px;
+    max-height: 200px;
 }
 
 /*

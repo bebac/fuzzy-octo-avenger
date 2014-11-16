@@ -14,10 +14,10 @@
 
 // ----------------------------------------------------------------------------
 #include "cmdque.h"
-#include "database.h"
 #include "audio_output_alsa.h"
 #include "source_base.h"
 #include "player_queue.h"
+#include "dm/dm.h"
 
 // ----------------------------------------------------------------------------
 #include <thread>
@@ -27,6 +27,7 @@
 #include <future>
 #include <queue>
 #include <map>
+#include <random>
 
 // ----------------------------------------------------------------------------
 const int player_status_ok              = 0;
@@ -35,9 +36,29 @@ const int player_status_track_not_found = 1;
 // ----------------------------------------------------------------------------
 struct player_state_info
 {
-  std::string         state;
-  database::track_ptr track;
-  std::string         source;
+  std::string state;
+  dm::track   track;
+  std::string source;
+};
+
+// ----------------------------------------------------------------------------
+class player_ctbp_selector
+{
+private:
+  using engine       = std::default_random_engine;
+  using distribution = std::uniform_int_distribution<int>;
+  using device       = std::random_device;
+public:
+  player_ctbp_selector();
+public:
+  void init();
+public:
+  dm::track next();
+private:
+  device rd_;
+  engine re_;
+private:
+  std::vector<std::string> track_ids_;
 };
 
 // ----------------------------------------------------------------------------
@@ -60,26 +81,18 @@ public:
     sources_.emplace(std::move(name), std::move(source));
   }
 public:
+  int queue(dm::track track);
+public:
   std::string play();
+#if 0
   int  play(int id, const std::string& source_name="");
-  //int  play(track_ptr track);
   int  queue(int id, const std::string& source_name="");
+#endif
   //int  queue(track_ptr track);
   void skip();
   void stop();
 public:
   player_state_info get_state_info() const;
-public:
-  json::value get_cover_by_album_id(int album_id) const;
-  json::value get_cover_by_track_id(int track_id) const;
-public:
-  json::value database_index();
-  json::value database_save(json::object track_json);
-  std::string database_delete_track(int track_id);
-  std::string database_delete_album(int album_id);
-  json::value database_tags();
-  json::value database_export_tracks();
-  json::value database_import_tracks(json::array tracks);
 public:
   void database_update_track_source(int track_id, json::object source_json);
 public:
@@ -90,20 +103,11 @@ private:
   void init();
   void loop();
 private:
+#if 0
   void play_id_handler(int id, const std::string& source_name, std::shared_ptr<std::promise<int>> promise);
-  //void play_track_handler(track_ptr track, std::shared_ptr<std::promise<int>> promise);
   void queue_id_handler(int id, const std::string& source_name, std::shared_ptr<std::promise<int>> promise);
-  //void queue_track_handler(track_ptr track, std::shared_ptr<std::promise<int>> promise);
-private:
-  void get_cover_by_album_id_handler(int album_id, std::shared_ptr<std::promise<json::value>> promise) const;
-private:
-  void database_index_handler(std::shared_ptr<std::promise<json::value>> promise);
-  void database_save_handler(json::object track_json, std::shared_ptr<std::promise<json::value>> promise);
-  void database_delete_track_handler(int id, std::shared_ptr<std::promise<std::string>> promise);
-  void database_delete_album_handler(int id, std::shared_ptr<std::promise<std::string>> promise);
-  void database_tags_handler(std::shared_ptr<std::promise<json::value>> promise);
-  void database_export_tracks_handler(std::shared_ptr<std::promise<json::value>> promise);
-  void database_import_tracks_handler(json::array tracks, std::shared_ptr<std::promise<json::value>> promise);
+#endif
+  void queue_handler(dm::track track, std::shared_ptr<std::promise<int>> promise);
 private:
   void start_of_track_handler();
   void end_of_track_handler();
@@ -112,19 +116,18 @@ private:
   void play_from_queue();
   void open_audio_output();
   void close_audio_output();
-  void source_play(const track_source& source);
+  void source_play(const dm::track_source& source);
   void queue_continuous_playback_tracks();
-private:
-  database::index  db_;
 private:
   std::function<void(const player_state_info& state_info)> state_info_cb_;
 private:
   std::map<std::string, std::shared_ptr<source_base>> sources_;
   std::string audio_device_;
   std::shared_ptr<audio_output_t> audio_output_;
-  player_queue<database::track_ptr> play_queue_;
+  player_queue<dm::track> play_queue_;
   bool continuous_playback_;
   json::object continuous_playback_filter_;
+  player_ctbp_selector ctpb_selector_;
   player_state_info state_;
 private:
   std::atomic<bool> running_;

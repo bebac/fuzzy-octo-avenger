@@ -7,10 +7,10 @@ namespace :local do
     ip = args[:ip] || fail("ip address required")
 
     EventMachine.run {
-      client = EventMachine::connect ip, 1100, SpotiHifi::Client, ip, 1100
+      client = EventMachine::connect ip, 8212, SpotiHifi::Client, ip, 8212
 
       client.invoke("local/scan", []) do |req|
-        req.timeout 60
+        req.timeout 120
 
         req.callback do |result|
           p result

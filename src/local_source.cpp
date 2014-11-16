@@ -11,6 +11,7 @@
 // ----------------------------------------------------------------------------
 
 #include "local_source.h"
+#include "dm/dm.h"
 
 // ----------------------------------------------------------------------------
 #include <taglib/fileref.h>
@@ -221,116 +222,129 @@ json::value local_source::get_cover(const std::string& uri)
   return json::value("cover not found");
 }
 
-// ----------------------------------------------------------------------------
-json::array local_source::scan() const
+// --------------------------------------------------------------------------
+void import_flac_file(const std::string& filename)
 {
-  json::array tracks;
+  //std::cerr << "import_flac_file " << filename << std::endl;
 
-  file_system::scan_dir(dirname_, [&](const std::string& filename)
+  TagLib::FLAC::File file(filename.c_str());
+
+  auto tag = file.tag();
+
+  auto artist_name = tag->artist().to8Bit(true);
+  auto album_title = tag->album().to8Bit(true);
+  auto track_title = tag->title().to8Bit(true);
+
+  auto artist = dm::artist::find_by_name(artist_name);
+
+  if ( artist.is_null() )
   {
-    TagLib::FileRef f(filename.c_str());
+    // Create artist.
+    artist.name(artist_name);
+    artist.save();
+  }
 
-    if ( !f.isNull() )
+  auto album = artist.find_album_by_title(album_title);
+
+  if ( album.is_null() )
+  {
+    // Create album.
+    album.title(album_title);
+    album.save();
+
+    // Add album to artist albums.
+    artist.add_album(album);
+    artist.save();
+  }
+
+  auto track = album.find_track_by_title(track_title);
+
+  // Set/update track attributes.
+
+  track.title(track_title);
+  track.track_number(tag->track());
+  track.disc_number(1);
+
+  // Create track source object.
+  json::object source{ { "name", "local" }, { "uri", filename } };
+
+  TagLib::FLAC::Properties* properties = file.audioProperties();
+  if ( properties )
+  {
+    track.duration(properties->length());
+  }
+
+  TagLib::Ogg::XiphComment* xiph_comment = file.xiphComment();
+  if ( xiph_comment )
+  {
+    auto field_map = xiph_comment->fieldListMap();
+
+    json::object replaygain;
+
+    for ( auto& field : field_map )
     {
-      auto tag = f.tag();
-
-      json::object track{
-        { "title",    tag->title().to8Bit(true) },
-        { "artist",   tag->artist().to8Bit(true) },
-        { "album",    json::object{ { "title", tag->album().to8Bit(true) } } },
-        { "tn",       tag->track() },
-        { "dn",       1 },
-        { "duration", 0 }
-      };
-
-      json::object source{ { "name", "local" }, { "uri", filename } };
-
-      if ( file_system::extension(filename) == "flac" )
+      if ( field.first == "TRACK NUMBER" )
       {
-        TagLib::FLAC::File file(filename.c_str());
-
-        TagLib::FLAC::Properties* properties = file.audioProperties();
-
-        if ( properties )
-        {
-          track["duration"] = properties->length();
-        }
-
-        const TagLib::List<TagLib::FLAC::Picture*>& images = file.pictureList();
-
-        if ( images.size() > 0 )
-        {
-          TagLib::FLAC::Picture* image = images[0];
-
-          if ( image->mimeType() == "image/jpeg" )
-          {
-            std::string image_data_s(reinterpret_cast<const char*>(image->data().data()), image->data().size());
-
-            std::stringstream is;
-            std::stringstream os;
-
-            is.str(image_data_s);
-
-            base64::encoder b64;
-
-            b64.encode(is, os);
-
-            json::object cover {
-              { "image_format", "jpg" },
-              { "image_data", os.str() }
-            };
-
-            auto& album = track["album"].as_object();
-
-            album["cover"] = std::move(cover);
-          }
-          else
-          {
-            std::cerr << "unhandled image mime type - " << filename << " images=" << images.size() << ", mime type " << image->mimeType() << std::endl;
-          }
-        }
-
-        TagLib::Ogg::XiphComment* xiph_comment = file.xiphComment();
-
-        if ( xiph_comment )
-        {
-          auto field_map = xiph_comment->fieldListMap();
-
-          json::object replaygain;
-
-          for ( auto& field : field_map )
-          {
-            if ( field.first == "TRACK NUMBER" )
-            {
-              track["tn"] = std::stoi(field.second[0].to8Bit());
-            }
-            else if ( field.first == "DISC NUMBER" )
-            {
-              track["dn"] = std::stoi(field.second[0].to8Bit());
-            }
-            else if ( field.first == "REPLAYGAIN_REFERENCE_LOUDNESS" )
-            {
-              auto ref_loudness = std::stod(field.second[0].to8Bit());
-              replaygain["reference_loudness"] = ref_loudness;
-            }
-            else if ( field.first == "REPLAYGAIN_TRACK_GAIN" )
-            {
-              auto gain = std::stod(field.second[0].to8Bit());
-              replaygain["track_gain"] = gain;
-            }
-          }
-
-          if ( !replaygain.empty() ) {
-            source["replaygain"] = replaygain;
-          }
-        }
+        track.track_number(std::stoi(field.second[0].to8Bit()));
       }
-
-      track["sources"] = json::array{ std::move(source) };
-
-      tracks.push_back(track);
+      else if ( field.first == "DISC NUMBER" )
+      {
+        track.disc_number(std::stoi(field.second[0].to8Bit()));
+      }
+      else if ( field.first == "REPLAYGAIN_REFERENCE_LOUDNESS" )
+      {
+        auto ref_loudness = std::stod(field.second[0].to8Bit());
+        replaygain["reference_loudness"] = ref_loudness;
+      }
+      else if ( field.first == "REPLAYGAIN_TRACK_GAIN" )
+      {
+        auto gain = std::stod(field.second[0].to8Bit());
+        replaygain["track_gain"] = gain;
+      }
     }
-  });
 
-  return std::move(tracks);
+    if ( !replaygain.empty() ) {
+      source["replaygain"] = replaygain;
+    }
+  }
+
+  const TagLib::List<TagLib::FLAC::Picture*>& images = file.pictureList();
+
+  if ( images.size() > 0 )
+  {
+    TagLib::FLAC::Picture* image = images[0];
+
+    if ( image->mimeType() == "image/jpeg" )
+    {
+      auto cover = dm::album_cover::find_by_album_id(album.id());
+
+      if ( cover.is_null() )
+      {
+        cover.format("jpg");
+        cover.data(reinterpret_cast<const char*>(image->data().data()), image->data().size());
+        cover.save();
+      }
+    }
+    else
+    {
+      std::cerr << "unhandled image mime type - " << filename << " images=" << images.size() << ", mime type " << image->mimeType() << std::endl;
+    }
+  }
+
+  track.artist(artist);
+  track.album(album);
+  track.source(std::move(source));
+
+  if ( track.id_is_null() )
+  {
+    // Create track id.
+    track.save();
+    // Add new track to album.
+    album.add_track(track);
+    album.save();
+  }
+  else
+  {
+    track.save();
+  }
 }

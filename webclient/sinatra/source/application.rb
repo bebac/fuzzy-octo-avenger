@@ -7,7 +7,8 @@ require_relative 'em-spotihifi-client'
 module Player
 
   IP   = '127.0.0.1'.freeze
-  PORT = 1100.freeze
+  #IP   = 'eeebox'.freeze
+  PORT = 8212.freeze
 
   def self.api
     @client ||= EventMachine::connect IP, PORT, SpotiHifi::Client, IP, PORT
@@ -20,7 +21,7 @@ module Player
       end
       req.errback do |error|
         puts "call error #{error.inspect}"
-        env['async.callback'].call([ 500, {"Content-Type" => 'application/json'}, error ])
+        env['async.callback'].call([ 500, {"Content-Type" => 'application/json'}, error || "unknown error" ])
       end
     end
     [-1, {}, []]
@@ -36,12 +37,17 @@ module TestApp
       erb :'index.html'
     end
 
+    get '/albums' do
+      erb :'albums.html'
+    end
+
     get '/api/index' do
       Player.call("db/index", [], env)
     end
 
     post '/api/queue' do
-      Player.call("player/queue", { "id" => params['id'].to_i }, env)
+      #Player.call("player/queue", { "id" => params['id'].to_i }, env)
+      Player.call("player/queue", { "id" => params['id'] }, env)
     end
 
     post '/api/tags' do
@@ -67,19 +73,19 @@ module TestApp
 
     get '/api/cover' do
       if params.key?("album_id")
-        rpc_params = { "album_id" => params['album_id'].to_i }
+        rpc_params = { "album_id" => params['album_id'] }
       else
-        rpc_params = { "track_id" => params['track_id'].to_i }
+        rpc_params = { "track_id" => params['track_id'] }
       end
 
-      Player.api.invoke("player/cover", rpc_params) do |req|
+      Player.api.invoke("db/cover", rpc_params) do |req|
 
         req.callback do |result|
           env['async.callback'].call([ 200, { "Content-Type" => 'image/jpeg', 'Cache-Control' => 'public, max-age=3600' }, Base64.decode64(result['image_data']) ])
         end
 
         req.errback do |error|
-          env['async.callback'].call([ 404, {}, error ])
+          env['async.callback'].call([ 404, {}, error || "unknown error" ])
         end
 
       end

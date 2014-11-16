@@ -20,10 +20,11 @@ ENV["CPPFLAGS"] = %q(-std=c++11)
 # -----------------------------------------------------------------------------
 popt = Rake::StaticLibraryTask.new("lib/program-options/program-options.yml")
 json = Rake::StaticLibraryTask.new("lib/json/json.yml")
+dm   = Rake::StaticLibraryTask.new("src/dm/dm.yml")
 
 # -----------------------------------------------------------------------------
 spec = Rake::ExecutableSpecification.new do |s|
-    s.name = 'spotd'
+    s.name = 'mboxd'
     s.includes.add %w(
         src
         lib/program-options/include
@@ -36,13 +37,13 @@ spec = Rake::ExecutableSpecification.new do |s|
         lib/libspotify-12.1.51-Linux-x86_64-release/lib
     )
     s.sources.add %w(
-        src/**/*.cpp
+        src/*.cpp
     )
-    s.libraries += [ popt, json ] + %w(asound FLAC++ tag spotify b64)
+    s.libraries += [ popt, dm, json ] + %w(asound FLAC++ tag spotify b64 kyotocabinet)
 end
 
 # -----------------------------------------------------------------------------
-Rake::ExecutableTask.new(:spotd, spec)
+Rake::ExecutableTask.new(:mboxd, spec)
 
 # -----------------------------------------------------------------------------
 spec = Rake::ExecutableSpecification.new do |s|
@@ -54,14 +55,14 @@ spec = Rake::ExecutableSpecification.new do |s|
         test/catch
     )
     s.libincludes.add %w(
-        build
+        buildimport_tracks
     )
     s.sources.add %w(
         src/local_source.cpp
         test/**/*.cpp
 
     )
-    s.libraries += [ json ] + %w(asound FLAC++ tag b64)
+    s.libraries += [ dm, json ] + %w(asound FLAC++ tag b64 kyotocabinet)
 end
 
 # -----------------------------------------------------------------------------
@@ -70,5 +71,5 @@ Rake::ExecutableTask.new(:test, spec)
 # -----------------------------------------------------------------------------
 CLEAN.include('build')
 # -----------------------------------------------------------------------------
-task :default => [ :spotd ]
+task :default => [ :mboxd ]
 task :all => [ :default ]

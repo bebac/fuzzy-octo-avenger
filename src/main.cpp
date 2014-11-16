@@ -14,9 +14,9 @@
 #include <connection.h>
 #include <player.h>
 #include <player_json_rpc.h>
-#include <database.h>
 #include <local_source.h>
 #include <spotify_source.h>
+#include <dm/dm.h>
 
 // ----------------------------------------------------------------------------
 #include <iostream>
@@ -75,6 +75,8 @@ void sig_handler(int signum)
 // ----------------------------------------------------------------------------
 void run(const options& options)
 {
+  dm::init();
+
   loop_.reset(new dripcore::loop);
 
   jsonrpc::service service(*loop_);
@@ -110,15 +112,17 @@ void run(const options& options)
   service.add_method("player/skip",      std::bind(&json_rpc::skip,                std::ref(player), _1));
   service.add_method("player/stop",      std::bind(&json_rpc::stop,                std::ref(player), _1));
   service.add_method("player/state",     std::bind(&json_rpc::state,               std::ref(player), _1));
-  service.add_method("player/cover",     std::bind(&json_rpc::cover,               std::ref(player), _1));
   service.add_method("player/ctpb",      std::bind(&json_rpc::continuous_playback, std::ref(player), _1));
-  service.add_method("db/index",         std::bind(&json_rpc::index,               std::ref(player), _1));
-  service.add_method("db/save",          std::bind(&json_rpc::save,                std::ref(player), _1));
-  service.add_method("db/delete",        std::bind(&json_rpc::erase,               std::ref(player), _1));
+#if 0
   service.add_method("db/tags",          std::bind(&json_rpc::tags,                std::ref(player), _1));
   service.add_method("db/export-tracks", std::bind(&json_rpc::export_tracks,       std::ref(player), _1));
-  service.add_method("db/import-tracks", std::bind(&json_rpc::import_tracks,       std::ref(player), _1));
-  service.add_method("local/scan",       std::bind(&json_rpc::local_scan,          std::ref(player), _1));
+#endif
+  service.add_method("db/index",         std::bind(&json_rpc::index,         _1));
+  service.add_method("db/save",          std::bind(&json_rpc::save,          _1));
+  service.add_method("db/delete",        std::bind(&json_rpc::erase,         _1));
+  service.add_method("db/import-tracks", std::bind(&json_rpc::import_tracks, _1));
+  service.add_method("db/cover",         std::bind(&json_rpc::cover,         _1));
+  service.add_method("local/scan",       std::bind(&json_rpc::local_scan, options.local_source_dirs, _1));
 
   /////
   // Setup callback to get player state info. Note that the callback is
@@ -131,7 +135,7 @@ void run(const options& options)
     json::object params
     {
       { "state",  info.state },
-      { "track",  to_json(*info.track) },
+      { "track",  info.track.to_json() },
       { "source", info.source }
     };
 

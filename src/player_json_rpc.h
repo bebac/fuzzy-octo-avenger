@@ -23,14 +23,17 @@ namespace json_rpc
   json_rpc_response skip(player& player, const json_rpc_request& request);
   json_rpc_response stop(player& player, const json_rpc_request& request);
   json_rpc_response state(player& player, const json_rpc_request& request);
-  json_rpc_response cover(player& player, const json_rpc_request& request);
-  json_rpc_response index(player& player, const json_rpc_request& request);
-  json_rpc_response save(player& player, const json_rpc_request& request);
-  json_rpc_response erase(player& player, const json_rpc_request& request);
+  json_rpc_response cover(const json_rpc_request& request);
+  json_rpc_response index(const json_rpc_request& request);
+  json_rpc_response save(const json_rpc_request& request);
+  json_rpc_response erase(const json_rpc_request& request);
+  json_rpc_response import_tracks(const json_rpc_request& request);
+#if 0
   json_rpc_response tags(player& player, const json_rpc_request& request);
   json_rpc_response export_tracks(player& player, const json_rpc_request& request);
   json_rpc_response import_tracks(player& player, const json_rpc_request& request);
-  json_rpc_response local_scan(player& player, const json_rpc_request& request);
+#endif
+  json_rpc_response local_scan(std::vector<std::string> dirs, const json_rpc_request& request);
   json_rpc_response continuous_playback(player& player, const json_rpc_request& request);
 } // namespace json_rpc
 

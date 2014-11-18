@@ -50,20 +50,23 @@ body, input {
     /*background: #818181;*/
     background: #B1B0B0;
     max-height: 500px;
+    min-height: 500px;
 }
 
 #now-playing-container {
+    position: relative;
     display: table;
     /*margin: auto;*/
     width: 100%;
 }
 
 #now-playing-track {
-    position: relative;
+    position: absolute;
     text-align: center;
     color: #B1B0B0;
     font-size: 2em;
     /*height: 2em;*/
+    width: 100%;
     z-index: 10;
     top: 0px;
     background: rgba(64,64,64,0.8);
@@ -75,8 +78,9 @@ body, input {
 }
 
 #now-playing-cover {
-    position: relative;
-    top: -3.66em;
+    position: absolute;
+    top: 0px;
+    width: 100%;
 }
 
 #now-playing-cover img {

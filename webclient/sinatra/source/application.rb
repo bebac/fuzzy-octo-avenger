@@ -7,7 +7,6 @@ require_relative 'em-spotihifi-client'
 module Player
 
   IP   = '127.0.0.1'.freeze
-  #IP   = 'eeebox'.freeze
   PORT = 8212.freeze
 
   def self.api

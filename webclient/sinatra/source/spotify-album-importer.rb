@@ -51,6 +51,19 @@ module Spotify
       return cover
     end
 
+    def make_mbox_track(track, album, artist, cover)
+      {
+        :title    => track.name,
+        :artist   => { :name => artist.name },
+        :album    => { :title => album.name },
+        :tn       => track.track_number,
+        :dn       => track.disc_number,
+        :duration => track.duration_ms/1000,
+        :source   => { :name => "spotify", :uri => track.uri },
+        :cover    => cover
+      }
+    end
+
     def lookup_album(uri, &blk)
       tracks = []
       open("https://api.spotify.com/v1/albums/#{uri}") { |f|
@@ -61,31 +74,27 @@ module Spotify
         cover  = load_cover(album.images[0]["url"])
 
         album.tracks["items"].each do |item|
-          track = Track.new(item)
+          tracks << make_mbox_track(Track.new(item), album, artist, cover)
+        end
 
-          track_json = {
-            :title    => track.name,
-            :artist   => { :name => artist.name },
-            :album    => { :title => album.name },
-            :tn       => track.track_number,
-            :dn       => track.disc_number,
-            :duration => track.duration_ms/1000,
-            :source   => { :name => "spotify", :uri => track.uri },
-            :cover    => cover
+        if album.tracks["next"]
+          open(album.tracks["next"]) { |file_next|
+            json = JSON.parse(file_next.read)
+            json["items"].each do |item|
+              tracks << make_mbox_track(Track.new(item), album, artist, cover)
+            end
           }
-
-          tracks << track_json
         end
       }
       fail("tracks is empty") if tracks.empty?
       save_track(tracks)
     end
 
-    def save_track(track)
+    def save_track(tracks)
       EventMachine.run {
         client = EventMachine::connect @ip, 8212, SpotiHifi::Client, @ip, 8212
 
-        client.invoke("db/import-tracks", track) do |req|
+        client.invoke("db/import-tracks", tracks) do |req|
           req.timeout 60
 
           req.callback do |result|

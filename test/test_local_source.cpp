@@ -12,6 +12,7 @@ TEST_CASE("test file system extension")
   REQUIRE( ext == "flac" );
 }
 
+#if 0
 // ----------------------------------------------------------------------------
 TEST_CASE("read flac tags")
 {
@@ -39,4 +40,4 @@ TEST_CASE("read flac tags")
 
   REQUIRE( rg.is_object() == true );
 }
-
+#endif

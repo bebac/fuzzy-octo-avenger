@@ -55,6 +55,7 @@ spec = Rake::ExecutableSpecification.new do |s|
         test/catch
     )
     s.libincludes.add %w(
+        build
         buildimport_tracks
     )
     s.sources.add %w(

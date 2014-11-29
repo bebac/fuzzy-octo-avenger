@@ -12,7 +12,7 @@ TEST_CASE("kvstore-create")
 {
   dm::kvstore kvstore("test.kdb");
 
-  REQUIRE(kvstore.count() == 2);
+  REQUIRE(kvstore.count() == 3);
 }
 
 // ----------------------------------------------------------------------------
@@ -29,7 +29,7 @@ TEST_CASE("kvstore-artist")
 {
   dm::kvstore kvstore("test.kdb");
 
-  REQUIRE(kvstore.count() == 2);
+  REQUIRE(kvstore.count() == 3);
 
   dm::artist::init(&kvstore);
   dm::album::init(&kvstore);

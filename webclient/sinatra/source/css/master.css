@@ -7,6 +7,7 @@ html {
 body, input {
     color: #333;
     font-size: 1em;
+    background: #eee;
 }
 
 .hide-overflow {
@@ -18,39 +19,44 @@ body, input {
 }
 
 #top {
-    height: 80px;
+    position: fixed;
+    top: 0;
+    height: 2.66em;
+    /*padding: 1em 1em 1em 1em;*/
     background: #B1B0B0;
+    width: 100%;
+    /*display: block;*/
+    z-index: 100;
 }
 
-#player {
+#top #show-playing-wrapper, #show-albums-wrapper {
+    /*height: 2.66em;*/
+    /*padding: 1em 1em 1em 1em;*/
+    /*position: absolute;*/
+    /*right: 0;*/
+    padding: 0.66em 1em 0.66em 1em;
+    display: inline-block;
 }
 
-#control {
-    background: #eee;
-    height: 200px;
+#top #show-playing, #show-albums-all {
+    cursor: pointer;
 }
 
-#control-container img {
-    padding: 1em 0 1em 0;
-    display: table;
-    margin: auto;
-    opacity: 0.5;
+#view-container {
+    position: relative;
+    margin-top: 2.66em;
+    /*height: 2000px;*/
 }
 
-#control-container img:hover {
-    opacity: 1;
-}
-
-#bottom {
-    background: #eee;
-    height: 200px;
-}
+/*
+ * Now Playing
+ */
 
 #now-playing {
     /*background: #818181;*/
     background: #B1B0B0;
-    max-height: 500px;
-    min-height: 500px;
+    max-height: 600px;
+    min-height: 600px;
 }
 
 #now-playing-container {
@@ -85,11 +91,26 @@ body, input {
 
 #now-playing-cover img {
     display: table;
-    /*max-width: 500px;*/
-    /*min-width: 500px;*/
-    min-height: 500px;
-    max-height: 500px;
+    min-height: 600px;
+    max-height: 600px;
     margin: auto;
+}
+
+#control {
+    position: relative;
+    background: #eee;
+    height: 200px;
+}
+
+#control-container img {
+    padding: 1em 0 1em 0;
+    display: table;
+    margin: auto;
+    opacity: 0.5;
+}
+
+#control-container img:hover {
+    opacity: 1;
 }
 
 /*
@@ -112,7 +133,7 @@ body, input {
     color: #555;
     width: 200px;
     margin: 1.66em;
-    background-color: #f1f1f1;
+    background-color: #ddd;
 }
 
 .album .title-wrap {
@@ -151,6 +172,7 @@ body, input {
     width: 100%;
     display: none;
     background:rgba(0,0,0,0.8);
+    z-index: 100;
 }
 
 #album-details {

@@ -2,39 +2,87 @@
 <html lang="en">
 
 <head>
-  <link rel="stylesheet" type="text/css" href="/assets/master.css">
-  <script src="/assets/master.js"></script>
+  <link rel="stylesheet" type="text/css" href="/assets/test.css">
+  <script src="/assets/test.js"></script>
 </head>
 
 <body>
 
   <div id="top">
-    <a href="albums">albums</a>
+
+    <div id="show-playing-wrapper">
+      <div id="show-playing">NOW PLAYING</div>
+    </div>
+
+    <div id="show-albums-wrapper">
+      <div id="show-albums-all">ALBUMS</div>
+    </div>
+
+  </div>
+
+  <script type="text/template" id="album-details-view">
+    <div>
+      <div class="cover">
+        <img src="<%%= cover_path %>">
+        <br>
+        #<%%= id %>
+      </div>
+      <h1><%%= title %></h1>
+      <h2><%%= artist %></h2>
+      <hr>
+      <ol class="track-list">
+      </ol>
+    </div>
+  </script>
+
+  <div id="album-details-container" class="hidden">
+    <div id="album-details">
+    </div>
+  </div>
+
+  <div id="view-container">
   </div>
 
   <script type="text/template" id="now-playing-view">
-    <div id="now-playing-container" class="clear">
-      <div id="now-playing-track">
-        <p><b><%%= track.title %></b> &bull; <%%= track.artist.name %> &bull; <%%= track.album.title %></p>
+    <div>
+      <div id="now-playing">
+        <div id="now-playing-container" class="clear">
+          <div id="now-playing-track">
+            <p><b><%%= title %></b> &bull; <%%= artist.name %> &bull; <%%= album.title %></p>
+          </div>
+          <div id="now-playing-cover">
+            <img src="api/cover?album_id=<%%= album.id %>"
+          </div>
+        </div>
       </div>
-      <div id="now-playing-cover">
-        <img src="api/cover?album_id=<%%= track.album.id %>"
+    </div>
+    <div id="control">
+      <div id="control-container">
+        <img src="assets/<%%= action %>.png" id="center-action">
       </div>
     </div>
   </script>
 
-  <div id="player">
-    <div id="now-playing"></div>
-  </div>
-
-  <div id="control">
-    <div id="control-container">
-      <img src="assets/stop.png">
+  <script type="text/template" id="album-view">
+    <div class="album">
+      <div class="title-wrap">
+        <div class="title">
+          <p><%%= title %></p>
+        </div>
+      </div>
+      <div class="cover">
+        <img src="<%%= cover_path %>">
+      </div>
+      <div class="artist">
+        <%%= artist %>
+      </div>
     </div>
-  </div>
+  </script>
 
-  <div id="bottom">
-  </div>
+  <script type="text/template" id="albums-view">
+    <div id="albums-view">
+    </div>
+  </script>
 
 </body>
 

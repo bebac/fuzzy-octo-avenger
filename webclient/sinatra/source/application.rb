@@ -36,10 +36,6 @@ module TestApp
       erb :'index.html'
     end
 
-    get '/albums' do
-      erb :'albums.html'
-    end
-
     get '/api/index' do
       Player.call("db/index", [], env)
     end
@@ -51,7 +47,7 @@ module TestApp
 
     post '/api/tags' do
       tags = params['tags'] || []
-      Player.call("db/save", { "id" => params['id'].to_i, "tags" => tags }, env)
+      Player.call("db/save", { "id" => params['id'], "tags" => tags }, env)
     end
 
     post '/api/play' do

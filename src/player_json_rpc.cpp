@@ -195,7 +195,7 @@ namespace json_rpc
             { "dn",       track.disc_number() },
             { "duration", track.duration() },
             //{ "rating",   -1 }
-            { "tags",     json::array() }
+            { "tags",     track.tags() }
           };
 
           jtracks.push_back(jtrack);
@@ -222,13 +222,56 @@ namespace json_rpc
 
     if ( request.params().is_object() )
     {
-      response.error(1, "not implemented yet");
+      auto& params = request.params().as_object();
+
+      auto& id = params["id"];
+
+      if ( !id.is_null() )
+      {
+        if ( id.is_string() )
+        {
+          auto track = dm::track::find_by_id(id.as_string());
+
+          if ( !track.is_null() )
+          {
+            auto& tags = params["tags"];
+
+            if ( !tags.is_null() )
+            {
+              if ( tags.is_array() )
+              {
+                track.tags(std::move(tags.as_array()));
+              }
+              else
+              {
+                response.error(3, "track tags not an array");
+                goto save_error;
+              }
+            }
+            track.save();
+            response.set_result("ok");
+          }
+          else
+          {
+            response.error(1, "track not found");
+          }
+        }
+        else
+        {
+          response.invalid_params();
+        }
+      }
+      else
+      {
+        response.error(2, "not implemented yet");
+      }
     }
     else
     {
       response.invalid_params();
     }
 
+save_error:
     return response;
   }
 

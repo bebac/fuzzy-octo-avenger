@@ -55,6 +55,7 @@ namespace dm
     const unsigned track_number() const;
     const unsigned disc_number() const;
     const unsigned duration() const;
+    const json::array tags() const;
     dm::artist artist() const;
     dm::album album() const;
   public:
@@ -63,6 +64,7 @@ namespace dm
     void track_number(unsigned v);
     void disc_number(unsigned v);
     void duration(unsigned v);
+    void tags(json::array v);
     void artist(const dm::artist& v);
     void album(const dm::album& v);
     void source(json::object&& jsource);

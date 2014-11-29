@@ -93,6 +93,16 @@ namespace dm
     return data_.at("duration").as_number();
   }
 
+  const json::array track::tags() const
+  {
+    if ( data_.has_member("tags") ) {
+      return data_.at("tags").as_array();
+    }
+    else {
+      return json::array();
+    }
+  }
+
   void track::title(const std::string& v)
   {
     data_["title"] = v;
@@ -123,6 +133,11 @@ namespace dm
   void track::duration(unsigned v)
   {
     data_["duration"] = v;
+  }
+
+  void track::tags(json::array v)
+  {
+    data_["tags"] = std::move(v);
   }
 
   void track::artist(const dm::artist& v)

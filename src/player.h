@@ -94,8 +94,6 @@ public:
 public:
   player_state_info get_state_info() const;
 public:
-  void database_update_track_source(int track_id, json::object source_json);
-public:
   std::shared_ptr<source_base> find_source(const std::string& source_name);
 public:
   void set_continuous_playback(json::object value);

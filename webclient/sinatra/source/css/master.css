@@ -152,6 +152,8 @@ body, input {
 .album .cover {
     min-height: 200px;
     max-height: 200px;
+    display: table;
+    vertical-align: top;
 }
 
 .album .cover img {

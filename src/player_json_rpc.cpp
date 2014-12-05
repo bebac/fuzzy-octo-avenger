@@ -29,8 +29,8 @@ namespace json_rpc
     {
       auto msg = player.play();
 
-      if ( msg.empty() ) {
-        response.set_result("ok");
+      if ( msg == "ok" ) {
+        response.set_result(msg);
       }
       else {
         response.error(1, msg);

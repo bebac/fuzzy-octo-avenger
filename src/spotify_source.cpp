@@ -303,8 +303,21 @@ void spotify_source::play_handler(const std::string& uri, std::weak_ptr<audio_ou
 }
 
 // ----------------------------------------------------------------------------
+void spotify_source::start_handler()
+{
+  if ( !audio_output_.expired() )
+  {
+    track_playing_ = true;
+    auto audio_output = audio_output_.lock();
+    audio_output->write_start_marker();
+  }
+}
+
+// ----------------------------------------------------------------------------
 void spotify_source::stop_handler()
 {
+  std::cerr << "spotify source - stop_handler track_playing_=" << track_playing_ << std::endl;
+
   if ( track_playing_ )
   {
     sp_session_player_unload(session_);
@@ -448,6 +461,7 @@ void spotify_source::play_token_lost_cb(sp_session *session)
 // ----------------------------------------------------------------------------
 void spotify_source::log_message_cb(sp_session *session, const char* data)
 {
+  std::cerr << "spotify source - log: " << data;
 }
 
 // ----------------------------------------------------------------------------
@@ -473,13 +487,9 @@ void spotify_source::user_info_updated_cb(sp_session *session)
 // ----------------------------------------------------------------------------
 void spotify_source::start_playback_cb(sp_session *session)
 {
+  std::cerr << "spotify source - start_playback_cb" << std::endl;
   auto self = reinterpret_cast<spotify_source*>(sp_session_userdata(session));
-  if ( !self->audio_output_.expired() )
-  {
-    self->track_playing_ = true;
-    auto audio_output = self->audio_output_.lock();
-    audio_output->write_start_marker();
-  }
+  self->command_queue_.push(std::bind(&spotify_source::start_handler, self));
 }
 
 // ----------------------------------------------------------------------------

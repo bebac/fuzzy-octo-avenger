@@ -73,6 +73,7 @@ private:
   void process_events_handler();
 private:
   void play_handler(const std::string& uri, audio_output_ptr audio_output);
+  void start_handler();
   void stop_handler();
   void track_loaded_handler();
 private:

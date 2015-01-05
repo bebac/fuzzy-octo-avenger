@@ -141,7 +141,6 @@ void player::skip()
 {
   command_queue_.push([this]()
   {
-    close_audio_output();
     play_stop();
     play_from_queue();
   });
@@ -152,7 +151,6 @@ void player::stop()
 {
   command_queue_.push([this]()
   {
-    close_audio_output();
     play_stop();
   });
 }
@@ -326,8 +324,6 @@ void player::start_of_track_handler()
 {
   std::cout << "start playback" << std::endl;
 
-  state_.state = playing;
-
   if ( state_info_cb_ ) {
     state_info_cb_(state_);
   }
@@ -338,7 +334,6 @@ void player::end_of_track_handler()
 {
   std::cout << "end playback" << std::endl;
 
-  play_stop();
   play_from_queue();
 }
 
@@ -347,6 +342,8 @@ void player::play_stop()
 {
   if ( state_.state == playing )
   {
+    close_audio_output();
+
     state_.state = stopped;
 
     if ( state_info_cb_ ){
@@ -368,6 +365,7 @@ void player::play_from_queue()
 
     std::cerr << "play_from_queue title=" << track.title() << " source=" << src.name() << std::endl;
 
+    state_.state  = playing;
     state_.track  = track;
     state_.source = src.name();
 
@@ -386,7 +384,7 @@ void player::play_from_queue()
   }
   else
   {
-    close_audio_output();
+    play_stop();
   }
 }
 

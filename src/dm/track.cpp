@@ -68,6 +68,25 @@ namespace dm
     return data_["id"].is_null();
   }
 
+  bool track::has_tag(std::string tag)
+  {
+    if ( data_.has_member("tags") )
+    {
+      auto& tags = data_["tags"].as_array();
+
+      for ( auto& track_tag : tags ) {
+        if ( track_tag.is_string() && track_tag.as_string() == tag ) {
+            return true;
+        }
+      }
+
+      return false;
+    }
+    else {
+      return false;
+    }
+  }
+
   const std::string& track::id() const
   {
     return data_.at("id").as_string();

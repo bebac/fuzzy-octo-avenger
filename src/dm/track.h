@@ -49,6 +49,8 @@ namespace dm
     bool is_null();
     bool id_is_null();
   public:
+    bool has_tag(std::string tag);
+  public:
     // Getters.
     const std::string& id() const;
     const std::string& title() const;

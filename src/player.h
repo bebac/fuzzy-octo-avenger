@@ -52,6 +52,7 @@ public:
   player_ctbp_selector();
 public:
   void init();
+  void init_by_tag(std::string tag);
 public:
   dm::track next();
 private:
@@ -84,6 +85,7 @@ public:
   int queue(dm::track track);
 public:
   std::string play();
+  std::string play_tag(std::string tag);
 #if 0
   int  play(int id, const std::string& source_name="");
   int  queue(int id, const std::string& source_name="");

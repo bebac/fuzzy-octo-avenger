@@ -49,6 +49,11 @@ public:
     return q_.size();
   }
 public:
+  void clear()
+  {
+    q_.clear();
+  }
+public:
   size_t push(T value, unsigned priority=1)
   {
     q_.emplace(begin(q_), element{value, priority});

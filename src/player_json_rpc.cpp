@@ -25,7 +25,29 @@ namespace json_rpc
 
     // TODO: Handle play by id.
 
-    if ( request.params().is_null() )
+    if ( request.params().is_object() )
+    {
+      auto& params = request.params().as_object();
+      auto& tag_member = params["tag"];
+
+      if ( tag_member.is_string() )
+      {
+        auto tag = tag_member.as_string();
+
+        auto msg = player.play_tag(tag);
+
+        if ( msg == "ok" ) {
+          response.set_result(msg);
+        }
+        else {
+          response.error(1, msg);
+        }
+      }
+      else  {
+        response.invalid_params();
+      }
+    }
+    else if ( request.params().is_null() )
     {
       auto msg = player.play();
 

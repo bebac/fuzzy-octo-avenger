@@ -31,11 +31,32 @@ player_ctbp_selector::player_ctbp_selector()
 // ----------------------------------------------------------------------------
 void player_ctbp_selector::init()
 {
+  track_ids_.clear();
+
   dm::track::each([&](dm::track& track) -> bool
   {
     track_ids_.push_back(track.id());
     return true;
   });
+
+  std::cout << "ctpb selector init track size " << track_ids_.size() << std::endl;
+}
+
+// ----------------------------------------------------------------------------
+void player_ctbp_selector::init_by_tag(std::string tag)
+{
+  track_ids_.clear();
+
+  dm::track::each([&](dm::track& track) -> bool
+  {
+    if ( track.has_tag(tag) )
+    {
+      track_ids_.push_back(track.id());
+    }
+    return true;
+  });
+
+  std::cout << "ctpb selector init track size " << track_ids_.size() << std::endl;
 }
 
 // ----------------------------------------------------------------------------
@@ -103,6 +124,9 @@ std::string player::play()
       }
       else if ( continuous_playback_ )
       {
+        // Reinitialize continous playback selector.
+        ctpb_selector_.init();
+        // Select track and start playback.
         play_queue_.push(ctpb_selector_.next());
         play_from_queue();
         promise->set_value("ok");
@@ -112,6 +136,26 @@ std::string player::play()
         promise->set_value("queue is empty");
       }
     }
+  });
+  return promise->get_future().get();
+}
+
+// ----------------------------------------------------------------------------
+std::string player::play_tag(std::string tag)
+{
+  auto promise = std::make_shared<std::promise<std::string>>();
+  command_queue_.push([=]()
+  {
+    // Reinitialize continous playback selector.
+    ctpb_selector_.init_by_tag(tag);
+
+    play_queue_.clear();
+    play_queue_.push(ctpb_selector_.next());
+
+    play_stop();
+    play_from_queue();
+
+    promise->set_value("ok");
   });
   return promise->get_future().get();
 }
@@ -352,6 +396,8 @@ void player::play_stop()
 
     state_.track = dm::track();
     state_.source = std::string();
+
+    std::cout << "player state=" << state_.state << std::endl;
   }
 }
 
@@ -363,11 +409,13 @@ void player::play_from_queue()
     auto track = play_queue_.front();
     auto src   = track.find_source();
 
-    std::cerr << "play_from_queue title=" << track.title() << " source=" << src.name() << std::endl;
+    std::cerr << "play_from_queue id=" << track.id() << ", title='" << track.title() << "', source=" << src.name() << std::endl;
 
     state_.state  = playing;
     state_.track  = track;
     state_.source = src.name();
+
+    std::cout << "player state=" << state_.state << std::endl;
 
     if ( !audio_output_ ) {
       open_audio_output();

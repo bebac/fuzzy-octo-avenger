@@ -345,12 +345,18 @@ void spotify_source::track_loaded_handler()
   {
     sp_error err;
 
+    sp_availability avail = sp_track_get_availability(session_, track_);
+
+    if ( avail != SP_TRACK_AVAILABILITY_AVAILABLE ) {
+      std::cerr << "spotify_source track unavailable " << avail << std::endl;
+    }
+
     if ( (err=sp_session_player_load(session_, track_)) != SP_ERROR_OK ) {
-      //_log_(error) << "sp_session_player_load error " << err;
+      std::cerr << "sp_session_player_load error " << err << std::endl;
     }
 
     if ( (err=sp_session_player_play(session_, 1)) != SP_ERROR_OK ) {
-      //_log_(error) << "sp_session_player_play error " << err;
+      std::cerr << "sp_session_player_play error " << err << std::endl;
     }
 
     track_loading_ = false;

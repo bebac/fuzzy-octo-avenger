@@ -76,7 +76,7 @@ public:
     end_marker_cb_ = callback;
   }
 public:
-  void set_error_callback(std::function<void()> callback)
+  void set_error_callback(std::function<void(const std::string& error_message)> callback)
   {
     error_cb_ = callback;
   }
@@ -96,6 +96,17 @@ public:
     {
       auto cb = end_marker_cb_;
       command_queue_.push(std::move(cb));
+    }
+  }
+public:
+  void write_error_marker(const std::string& error_message)
+  {
+    if ( error_cb_ )
+    {
+      auto cb = error_cb_;
+      command_queue_.push([=]{
+        cb(error_message);
+      });
     }
   }
 public:
@@ -189,7 +200,7 @@ private:
       }
     }
 
-    err = snd_pcm_set_params(handle_, SND_PCM_FORMAT_S32_LE, SND_PCM_ACCESS_RW_INTERLEAVED, 2, sample_rate_, 0, 500000);
+    err = snd_pcm_set_params(handle_, SND_PCM_FORMAT_S32_LE, SND_PCM_ACCESS_RW_INTERLEAVED, 2, sample_rate_, 0, 500*1024);
     if ( err < 0 ) {
       //_log_(error) << "snd_pcm_set_params failed! " << snd_strerror(err);
       std::cerr << "snd_pcm_set_params failed! " << snd_strerror(err);
@@ -262,7 +273,8 @@ private:
 private:
   std::function<void()> start_marker_cb_;
   std::function<void()> end_marker_cb_;
-  std::function<void()> error_cb_;
+private:
+  std::function<void(const std::string& error_message)> error_cb_;
 private:
   snd_pcm_t*            handle_;
   std::atomic<unsigned> sample_rate_;

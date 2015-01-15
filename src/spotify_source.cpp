@@ -348,7 +348,11 @@ void spotify_source::track_loaded_handler()
     sp_availability avail = sp_track_get_availability(session_, track_);
 
     if ( avail != SP_TRACK_AVAILABILITY_AVAILABLE ) {
-      std::cerr << "spotify_source track unavailable " << avail << std::endl;
+      if ( !audio_output_.expired() )
+      {
+        auto audio_output = audio_output_.lock();
+        audio_output->write_error_marker("track unavailable");
+      }
     }
 
     if ( (err=sp_session_player_load(session_, track_)) != SP_ERROR_OK ) {

@@ -382,6 +382,18 @@ void player::end_of_track_handler()
 }
 
 // ----------------------------------------------------------------------------
+void player::audio_output_error(const std::string& error_message)
+{
+  std::cout
+    << "audio outout error '" << error_message << "' "
+    << "source=" << state_.source << " "
+    << "track=" << state_.track.to_json()
+    << std::endl;
+
+    play_stop();
+}
+
+// ----------------------------------------------------------------------------
 void player::play_stop()
 {
   if ( state_.state == playing )
@@ -447,6 +459,10 @@ void player::open_audio_output()
 
   audio_output_->set_end_marker_callback([this]() {
       command_queue_.push(std::bind(&player::end_of_track_handler, this));
+    });
+
+  audio_output_->set_error_callback([this](const std::string& error_message) {
+      command_queue_.push(std::bind(&player::audio_output_error, this, error_message));
     });
 }
 

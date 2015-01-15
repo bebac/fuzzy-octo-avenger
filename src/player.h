@@ -111,6 +111,7 @@ private:
 private:
   void start_of_track_handler();
   void end_of_track_handler();
+  void audio_output_error(const std::string& error_message);
 private:
   void play_stop();
   void play_from_queue();

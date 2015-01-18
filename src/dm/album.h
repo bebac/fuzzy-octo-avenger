@@ -80,7 +80,7 @@ namespace dm
   public:
     json::value to_json() { return data_; }
   public:
-    track find_track_by_title(const std::string& title);
+    track find_track_by_title_and_number(const std::string& title, unsigned track_number);
   public:
     void each_track(std::function<bool(track& track)> value_cb);
   public:

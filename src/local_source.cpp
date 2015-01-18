@@ -257,7 +257,7 @@ void import_flac_file(const std::string& filename)
     artist.save();
   }
 
-  auto track = album.find_track_by_title(track_title);
+  auto track = album.find_track_by_title_and_number(track_title, tag->track());
 
   // Set/update track attributes.
 

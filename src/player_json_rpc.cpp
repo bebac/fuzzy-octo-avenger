@@ -433,15 +433,16 @@ save_error:
             artist.save();
           }
 
-          auto track = album.find_track_by_title(track_title);
+          auto& tn = track_obj["tn"];
+
+          if ( !tn.is_number() ) {
+            throw std::runtime_error("invalid track_number");
+          }
+
+          auto track = album.find_track_by_title_and_number(track_title, tn.as_number());
 
           track.title(track_title);
-
-          auto& tn = track_obj["tn"];
-          if ( tn.is_number() )
-          {
-            track.track_number(tn.as_number());
-          }
+          track.track_number(tn.as_number());
 
           auto& dn = track_obj["dn"];
           if ( dn.is_number() )

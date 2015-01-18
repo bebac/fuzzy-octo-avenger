@@ -198,7 +198,7 @@ namespace dm
     kvstore_->set(id.as_string(), data_);
   }
 
-  track album::find_track_by_title(const std::string& title)
+  track album::find_track_by_title_and_number(const std::string& title, unsigned track_number)
   {
     for ( auto& id : track_ids() )
     {
@@ -206,7 +206,7 @@ namespace dm
 
       if ( !track.is_null() )
       {
-        if ( track.title() == title ) {
+        if ( track.title() == title && track.track_number() == track_number ) {
           return track;
         }
       }

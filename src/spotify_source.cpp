@@ -254,7 +254,9 @@ void spotify_source::loop()
     init();
     while ( running_ )
     {
-      auto cmd = command_queue_.pop(std::chrono::seconds(1));
+      auto cmd = command_queue_.pop(std::chrono::milliseconds(session_next_timeout_), [this] {
+        process_events_handler();
+      });
       cmd();
     }
 }

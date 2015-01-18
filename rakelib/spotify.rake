@@ -5,11 +5,13 @@ require_relative '../webclient/sinatra/source/spotify-album-importer'
 namespace :spotify do
 
   desc "Import spotify album"
-  task :import, [ :ip, :uri ] do |t, args|
-    ip  = args[:ip]  || fail("ip address required")
-    uri = args[:uri] || fail("spotify uri required")
+  task :import, [ :ip, :uri, *:a..:z ] do |t, args|
+    ip     = args[:ip]  || fail("ip address required")
+    uri    = args[:uri] || fail("spotify uri required")
+    tracks = args.values_at(*(:a..:z)).collect { |i| i.to_i if i }.compact!
+    tracks = tracks.length > 0 ? tracks : nil
     id = uri.sub(/spotify:album:/, '')
-    Spotify::AlbumImporter.new(ip).import(id)
+    Spotify::AlbumImporter.new(ip).import(id, tracks)
   end
 
   desc "Import spotify albums from json list"

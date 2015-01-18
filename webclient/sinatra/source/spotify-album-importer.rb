@@ -37,8 +37,16 @@ module Spotify
       @ip  = ip
     end
 
-    def import(uri)
-      lookup_album(uri) do |album|
+    def import(uri, track_numbers=nil)
+      tracks = lookup_album(uri)
+      if track_numbers
+        if track_numbers.length == 1
+          save_track([tracks[*track_numbers]])
+        else
+          save_track(tracks[*track_numbers])
+        end
+      else
+        save_track(tracks)
       end
     end
 
@@ -64,7 +72,7 @@ module Spotify
       }
     end
 
-    def lookup_album(uri, &blk)
+    def lookup_album(uri)
       tracks = []
       open("https://api.spotify.com/v1/albums/#{uri}") { |f|
         json  = JSON.parse(f.read)
@@ -87,7 +95,7 @@ module Spotify
         end
       }
       fail("tracks is empty") if tracks.empty?
-      save_track(tracks)
+      tracks
     end
 
     def save_track(tracks)

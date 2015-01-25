@@ -153,10 +153,14 @@ namespace jsonrpc
           obuf_.erase(0, sent);
           obuf_.reserve(1024);
         }
+        else if ( errno == EWOULDBLOCK || errno == EAGAIN )
+        {
+          std::cerr << "connection write error " << strerror(errno) << std::endl;
+        }
         else
         {
-          // TODO: Handle send error, EWOULDBLOCK, EAGAIN etc.
           std::cerr << "connection write error " << strerror(errno) << std::endl;
+          stop();
         }
       }
     public:

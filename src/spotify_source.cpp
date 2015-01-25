@@ -254,8 +254,22 @@ void spotify_source::loop()
     init();
     while ( running_ )
     {
-      auto cmd = command_queue_.pop(std::chrono::milliseconds(session_next_timeout_), [this] {
-        process_events_handler();
+      auto cmd = command_queue_.pop(milliseconds(250), [this]
+      {
+        if ( track_playing_ &&
+             std::chrono::steady_clock::now() > (track_started_at_ + track_duration_) )
+        {
+          // If we end up here it probably means that the spotify end-of-track
+          // callback did not fire.
+
+          sp_session_player_unload(session_);
+
+          std::cerr << "spotify source - loop - end of track!!!" << std::endl;
+        }
+
+        if (std::chrono::steady_clock::now() > session_next_timeout_ ) {
+          process_events_handler();
+        }
       });
       cmd();
     }
@@ -264,21 +278,30 @@ void spotify_source::loop()
 // ----------------------------------------------------------------------------
 void spotify_source::process_events_handler()
 {
+  int next_timeout;
+
   do
   {
-    sp_session_process_events(session_, &session_next_timeout_);
-  } while (session_next_timeout_ == 0);
+    sp_session_process_events(session_, &next_timeout);
+  } while (next_timeout == 0);
+
+  session_next_timeout_ = std::chrono::steady_clock::now() + milliseconds(next_timeout);
+
+  //std::cerr << "spotify source - process_events_handler next_timeout in " << next_timeout << "ms" << std::endl;
 }
 
 // ----------------------------------------------------------------------------
 void spotify_source::play_handler(const std::string& uri, std::weak_ptr<audio_output_t> audio_output)
 {
   // If currently playing a track, stop it before starting load of the new track.
-  stop_handler();
+  if ( track_playing_ )
+  {
+    stop_handler();
+  }
 
   audio_output_ = audio_output;
 
-  std::cerr << "play_handler audio_output=" << audio_output.lock().get() << std::endl;
+  std::cerr << "spotify source - play_handler audio_output=" << audio_output.lock().get() << std::endl;
 
   sp_link* link = sp_link_create_from_string(uri.c_str());
 
@@ -307,12 +330,11 @@ void spotify_source::play_handler(const std::string& uri, std::weak_ptr<audio_ou
 // ----------------------------------------------------------------------------
 void spotify_source::start_handler()
 {
-  if ( !audio_output_.expired() )
-  {
-    track_playing_ = true;
-    auto audio_output = audio_output_.lock();
-    audio_output->write_start_marker();
-  }
+  std::cerr << "spotify source - start_handler duration=" << sp_track_duration(track_) << "ms" << std::endl;
+
+  track_playing_    = true;
+  track_duration_   = milliseconds(sp_track_duration(track_));
+  track_started_at_ = std::chrono::steady_clock::now();
 }
 
 // ----------------------------------------------------------------------------
@@ -356,6 +378,9 @@ void spotify_source::track_loaded_handler()
         audio_output->write_error_marker("track unavailable");
       }
     }
+
+    auto audio_output = audio_output_.lock();
+    audio_output->write_start_marker();
 
     if ( (err=sp_session_player_load(session_, track_)) != SP_ERROR_OK ) {
       std::cerr << "sp_session_player_load error " << err << std::endl;
@@ -455,13 +480,19 @@ int spotify_source::music_delivery(sp_session *session, const sp_audioformat *fo
     }
 
     audio_output->write_s16_le_i(frames, num_frames);
+
+    return num_frames;
   }
   else
   {
-    self->command_queue_.push(std::bind(&spotify_source::stop_handler, self));
-  }
+    std::cerr << "spotify source - music_delivery(1) num_frames=" << num_frames << std::endl;
 
-  return num_frames;
+    self->command_queue_.push([=]() {
+      sp_session_player_unload(self->session_);
+    });
+
+    return 0;
+  }
 }
 
 // ----------------------------------------------------------------------------
@@ -473,14 +504,15 @@ void spotify_source::play_token_lost_cb(sp_session *session)
 // ----------------------------------------------------------------------------
 void spotify_source::log_message_cb(sp_session *session, const char* data)
 {
-  std::cerr << "spotify source - log: " << data;
+  //std::cerr << "spotify source - log: " << data;
 }
 
 // ----------------------------------------------------------------------------
 void spotify_source::end_of_track_cb(sp_session *session)
 {
-  std::cerr << "spotify source - end_of_track_cb" << std::endl;
   auto self = reinterpret_cast<spotify_source*>(sp_session_userdata(session));
+
+  std::cerr << "spotify source - end_of_track_cb" << std::endl;
 
   self->command_queue_.push(std::bind(&spotify_source::stop_handler, self));
 }
@@ -507,9 +539,11 @@ void spotify_source::start_playback_cb(sp_session *session)
 // ----------------------------------------------------------------------------
 void spotify_source::stop_playback_cb(sp_session *session)
 {
-  std::cerr << "spotify source - stop_playback_cb" << std::endl;
   auto self = reinterpret_cast<spotify_source*>(sp_session_userdata(session));
-  self->command_queue_.push(std::bind(&spotify_source::stop_handler, self));
+
+  if ( self->track_playing_ ) {
+    self->command_queue_.push(std::bind(&spotify_source::stop_handler, self));
+  }
 }
 
 // ----------------------------------------------------------------------------
@@ -521,6 +555,11 @@ void spotify_source::get_audio_buffer_stats_cb(sp_session *session, sp_audio_buf
   if ( audio_output.get() )
   {
     stats->samples = audio_output->queued_frames();
+    stats->stutter = 0;
+  }
+  else
+  {
+    stats->samples = 0;
     stats->stutter = 0;
   }
 }

@@ -22,6 +22,7 @@
 #include <atomic>
 #include <future>
 #include <set>
+#include <chrono>
 
 // ----------------------------------------------------------------------------
 #include <libspotify/api.h>
@@ -58,6 +59,10 @@ class spotify_source : public source_base
   friend class spotify_cover_loader;
 private:
   using audio_output_ptr = std::weak_ptr<audio_output_t>;
+private:
+  using time_point   = std::chrono::steady_clock::time_point;
+  using milliseconds = std::chrono::milliseconds;
+  using seconds      = std::chrono::seconds;
 public:
   spotify_source(const spotify_source_config& config);
 public:
@@ -100,10 +105,12 @@ private:
   static void credentials_blob_updated_cb(sp_session *session, const char* blob);
 private:
   sp_session*           session_;
-  int                   session_next_timeout_;
+  time_point            session_next_timeout_;
 private:
   sp_track*             track_;
   std::atomic<bool>     track_playing_;
+  milliseconds          track_duration_;
+  time_point            track_started_at_;
   std::atomic<bool>     track_loading_;
   audio_output_ptr      audio_output_;
 private:

@@ -86,7 +86,16 @@ public:
     if ( start_marker_cb_ )
     {
       auto cb = start_marker_cb_;
-      command_queue_.push(std::move(cb));
+      command_queue_.push([=]
+      {
+        cb();
+
+        int res;
+
+        if ( (res=snd_pcm_prepare(handle_)) < 0 ) {
+          std::cerr << "prepare pcm error " << snd_strerror(res) << std::endl;
+        }
+      });
     }
   }
 public:
@@ -95,7 +104,16 @@ public:
     if ( end_marker_cb_ )
     {
       auto cb = end_marker_cb_;
-      command_queue_.push(std::move(cb));
+      command_queue_.push([=]
+      {
+        int res;
+
+        if ( (res=snd_pcm_drain(handle_)) < 0 ) {
+          std::cerr << "drain pcm error " << snd_strerror(res) << std::endl;
+        }
+
+        cb();
+      });
     }
   }
 public:

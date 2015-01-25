@@ -83,37 +83,37 @@ public:
 public:
   void write_start_marker()
   {
+    // Prepare PCM.
+    command_queue_.push([=]
+    {
+      auto res = snd_pcm_prepare(handle_);
+      if ( res < 0 ) {
+        std::cerr << "prepare pcm error " << snd_strerror(res) << std::endl;
+      }
+    });
+    // Schedule start marker callback if set.
     if ( start_marker_cb_ )
     {
       auto cb = start_marker_cb_;
-      command_queue_.push([=]
-      {
-        cb();
-
-        int res;
-
-        if ( (res=snd_pcm_prepare(handle_)) < 0 ) {
-          std::cerr << "prepare pcm error " << snd_strerror(res) << std::endl;
-        }
-      });
+      command_queue_.push([=] { cb(); });
     }
   }
 public:
   void write_end_marker()
   {
+    // Drain PCM.
+    command_queue_.push([=]
+    {
+      auto res = snd_pcm_drain(handle_);
+      if ( res < 0 ) {
+        std::cerr << "drain pcm error " << snd_strerror(res) << std::endl;
+      }
+    });
+    // Schedule end marker callback if set.
     if ( end_marker_cb_ )
     {
       auto cb = end_marker_cb_;
-      command_queue_.push([=]
-      {
-        int res;
-
-        if ( (res=snd_pcm_drain(handle_)) < 0 ) {
-          std::cerr << "drain pcm error " << snd_strerror(res) << std::endl;
-        }
-
-        cb();
-      });
+      command_queue_.push([=] { cb(); });
     }
   }
 public:

@@ -257,7 +257,7 @@ void spotify_source::loop()
       auto cmd = command_queue_.pop(milliseconds(250), [this]
       {
         if ( track_playing_ &&
-             std::chrono::steady_clock::now() > (track_started_at_ + track_duration_) )
+             std::chrono::steady_clock::now() > (track_started_at_ + track_duration_ + seconds(1)) )
         {
           // If we end up here it probably means that the spotify end-of-track
           // callback did not fire.

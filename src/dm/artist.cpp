@@ -91,6 +91,25 @@ namespace dm
     }
   }
 
+  void artist::remove_album(const album& album)
+  {
+    auto& jalbums = data_["albums"];
+
+    if ( jalbums.is_array() )
+    {
+      auto remaining_albums = json::array();
+
+      auto& albums = jalbums.as_array();
+      for ( auto& jalbum : albums )
+      {
+        if ( jalbum.as_string() != album.id() ) {
+          remaining_albums.push_back(jalbum.as_string());
+        }
+      }
+      jalbums = std::move(remaining_albums);
+    }
+  }
+
   void artist::save()
   {
     auto& id = data_["id"];

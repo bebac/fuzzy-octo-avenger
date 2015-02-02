@@ -40,6 +40,7 @@ namespace dm
     void data(json::object&& data);
   public:
     void save();
+    void erase();
   public:
     static album_cover find_by_album_id(const std::string& id);
   public:
@@ -77,6 +78,7 @@ namespace dm
     void member(const std::string& key, json::value&& value);
   public:
     void save();
+    void erase();
   public:
     json::value to_json() { return data_; }
   public:

@@ -71,6 +71,11 @@ namespace dm
     kvstore_->set(key_, data_);
   }
 
+  void album_cover::erase()
+  {
+    kvstore_->remove(key_);
+  }
+
   album_cover album_cover::find_by_album_id(const std::string& id)
   {
     auto key  = id+"/cover";
@@ -196,6 +201,19 @@ namespace dm
     }
 
     kvstore_->set(id.as_string(), data_);
+  }
+
+  void album::erase()
+  {
+    // Make sure to remove album references from artists before calling
+    // album::erase.
+
+    auto& id = data_["id"];
+
+    if ( !id.is_null() )
+    {
+      kvstore_->remove(id.as_string());
+    }
   }
 
   track album::find_track_by_title_and_number(const std::string& title, unsigned track_number)

@@ -228,7 +228,12 @@ namespace json_rpc
         return true;
       });
 
-      artists.push_back(jartist);
+      // Don't include artists with no albums.
+      if ( albums.size() > 0 )
+      {
+        artists.push_back(jartist);
+      }
+
       return true;
     });
 
@@ -310,16 +315,56 @@ save_error:
       {
         if ( jid.is_string() )
         {
-          auto track = dm::track::find_by_id(jid.as_string());
+          auto id = jid.as_string();
 
-          if ( !track.is_null() )
+          if ( id.length() == 6 && id[0] == 'a' && id[1] == 'l' )
           {
-            auto album = track.album();
+            auto album = dm::album::find_by_id(id);
 
-            album.remove_track(track);
-            album.save();
+            // For now only allow delete if album has no tracks.
+            auto tracks = album.track_ids();
 
-            track.erase();
+            if ( tracks.size() == 0 )
+            {
+              // Iterate all artists to remove album reference.
+              dm::artist::each([&](dm::artist& artist) -> bool
+              {
+                artist.remove_album(album);
+                artist.save();
+                return true;
+              });
+              // Delete album cover
+              auto cover = dm::album_cover::find_by_album_id(album.id());
+              if ( !cover.is_null() )
+              {
+                cover.erase();
+              }
+              // Delete the album.
+              album.erase();
+            }
+            else
+            {
+              // Error!
+            }
+          }
+          else if ( id.length() == 6 && id[0] == 't' )
+          {
+            auto track = dm::track::find_by_id(id);
+
+            if ( !track.is_null() )
+            {
+              auto album = track.album();
+
+              album.remove_track(track);
+              album.save();
+
+              track.erase();
+            }
+          }
+          else
+          {
+            response.invalid_params();
+            break;
           }
         }
         else

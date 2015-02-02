@@ -43,6 +43,7 @@ namespace dm
     // Setters.
     void name(const std::string& v);
     void add_album(const album& album);
+    void remove_album(const album& album);
   public:
     void save();
   public:

@@ -390,7 +390,9 @@ void player::audio_output_error(const std::string& error_message)
     << "track=" << state_.track.to_json()
     << std::endl;
 
-    play_stop();
+  audio_output_.reset();
+
+  play_from_queue();
 }
 
 // ----------------------------------------------------------------------------

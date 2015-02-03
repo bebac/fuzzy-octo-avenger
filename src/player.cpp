@@ -39,6 +39,8 @@ void player_ctbp_selector::init()
     return true;
   });
 
+  std::shuffle(track_ids_.begin(), track_ids_.end(), re_);
+
   std::cout << "ctpb selector init track size " << track_ids_.size() << std::endl;
 }
 
@@ -55,6 +57,8 @@ void player_ctbp_selector::init_by_tag(std::string tag)
     }
     return true;
   });
+
+  std::shuffle(track_ids_.begin(), track_ids_.end(), re_);
 
   std::cout << "ctpb selector init track size " << track_ids_.size() << std::endl;
 }

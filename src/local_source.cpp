@@ -250,6 +250,7 @@ void import_flac_file(const std::string& filename)
   {
     // Create album.
     album.title(album_title);
+    album.member("artist", json::object{ { "id", artist.id() }, { "name", artist.name() } });
     album.save();
 
     // Add album to artist albums.
@@ -283,11 +284,11 @@ void import_flac_file(const std::string& filename)
 
     for ( auto& field : field_map )
     {
-      if ( field.first == "TRACK NUMBER" )
+      if ( field.first == "TRACK NUMBER" || field.first == "TRACKNUMBER" )
       {
         track.track_number(std::stoi(field.second[0].to8Bit()));
       }
-      else if ( field.first == "DISC NUMBER" )
+      else if ( field.first == "DISC NUMBER" || field.first == "DISCNUMBER" )
       {
         track.disc_number(std::stoi(field.second[0].to8Bit()));
       }

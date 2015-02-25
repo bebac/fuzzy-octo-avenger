@@ -51,9 +51,12 @@ namespace dm
   public:
     void each_album(std::function<bool(album& album)> value_cb);
   public:
+    static json::array find_all();
+  public:
     static artist find_by_id(const std::string& id);
     static artist find_by_name(const std::string& name);
   public:
+    static void each(std::function<bool(json::value& value)> value_cb);
     static void each(std::function<bool(artist& artist)> value_cb);
   private:
     json::object data_;

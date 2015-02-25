@@ -249,6 +249,19 @@ namespace dm
     }
   }
 
+  json::array album::find_all()
+  {
+    json::array res;
+
+    album::each([&](json::value& value) -> bool
+    {
+      res.push_back(std::move(value));
+      return true;
+    });
+
+    return std::move(res);
+  }
+
   album album::find_by_id(const std::string& id)
   {
     auto data = kvstore_->get(id);
@@ -259,5 +272,37 @@ namespace dm
     else {
       return std::move(album());
     }
+  }
+
+  void album::each(std::function<bool(json::value& value)> value_cb)
+  {
+    kvstore_->each(
+      [](const std::string& key) -> bool
+      {
+        if ( key.length() == 6 && key[0] == 'a' && key[1] == 'l' ) {
+          return true;
+        }
+        else {
+          return false;
+        }
+      },
+      [&](json::value& value) -> bool
+      {
+        if ( value.is_object() ) {
+          value_cb(value);
+        }
+        return true;
+      }
+    );
+
+  }
+
+  void album::each(std::function<bool(album& album)> value_cb)
+  {
+    each([&](json::value& value) -> bool
+    {
+      auto v = album(std::move(value.as_object()));
+      return value_cb(v);
+    });
   }
 }

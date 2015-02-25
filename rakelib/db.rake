@@ -62,4 +62,79 @@ namespace :db do
   end
 =end
 
+  desc "Get artists"
+  task :artists, [ :ip ] do |t, args|
+    ip = args[:ip] || fail("ip address required")
+
+    EventMachine.run {
+      client = EventMachine::connect ip, 8212, SpotiHifi::Client, ip, 8212
+
+      client.invoke("db/get/artists", nil) do |req|
+        req.timeout 2
+
+        req.callback do |result|
+          result.each do |track|
+            puts JSON.pretty_generate(track)
+          end
+          EventMachine.stop
+        end
+
+        req.errback do |error|
+          p error
+          EventMachine.stop
+        end
+      end
+    }
+  end
+
+  desc "Get albums"
+  task :albums, [ :ip ] do |t, args|
+    ip = args[:ip] || fail("ip address required")
+
+    EventMachine.run {
+      client = EventMachine::connect ip, 8212, SpotiHifi::Client, ip, 8212
+
+      client.invoke("db/get/albums", nil) do |req|
+        req.timeout 2
+
+        req.callback do |result|
+          result.each do |album|
+            p album
+          end
+          EventMachine.stop
+        end
+
+        req.errback do |error|
+          p error
+          EventMachine.stop
+        end
+      end
+    }
+  end
+
+  desc "Get tracks"
+  task :tracks, [ :ip ] do |t, args|
+    ip = args[:ip] || fail("ip address required")
+
+    EventMachine.run {
+      client = EventMachine::connect ip, 8212, SpotiHifi::Client, ip, 8212
+
+      client.invoke("db/get/tracks", nil) do |req|
+        req.timeout 2
+
+        req.callback do |result|
+          result.each do |track|
+            puts JSON.pretty_generate(track)
+          end
+          EventMachine.stop
+        end
+
+        req.errback do |error|
+          p error
+          EventMachine.stop
+        end
+      end
+    }
+  end
+
 end

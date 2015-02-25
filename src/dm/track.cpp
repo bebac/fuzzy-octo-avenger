@@ -243,6 +243,19 @@ namespace dm
     }
   }
 
+  json::array track::find_all()
+  {
+    json::array res;
+
+    track::each([&](json::value& value) -> bool
+    {
+      res.push_back(std::move(value));
+      return true;
+    });
+
+    return std::move(res);
+  }
+
   track track::find_by_id(const std::string& id)
   {
     auto data = kvstore_->get(id);
@@ -257,7 +270,7 @@ namespace dm
     }
   }
 
-  void track::each(std::function<bool(track& track)> value_cb)
+  void track::each(std::function<bool(json::value& value)> value_cb)
   {
     kvstore_->each(
       [](const std::string& key) -> bool
@@ -271,13 +284,21 @@ namespace dm
       },
       [&](json::value& value) -> bool
       {
-        if ( value.is_object() )
-        {
-          auto v = track(std::move(value.as_object()));
-          value_cb(v);
+        if ( value.is_object() ) {
+          value_cb(value);
         }
         return true;
       }
     );
+
+  }
+
+  void track::each(std::function<bool(track& track)> value_cb)
+  {
+    each([&](json::value& value) -> bool
+    {
+      auto v = track(std::move(value.as_object()));
+      return value_cb(v);
+    });
   }
 }

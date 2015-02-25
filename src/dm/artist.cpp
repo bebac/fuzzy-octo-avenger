@@ -151,6 +151,19 @@ namespace dm
     }
   }
 
+  json::array artist::find_all()
+  {
+    json::array res;
+
+    each([&](json::value& value) -> bool
+    {
+      res.push_back(std::move(value));
+      return true;
+    });
+
+    return std::move(res);
+  }
+
   artist artist::find_by_id(const std::string& id)
   {
     auto data = kvstore_->get(id);
@@ -169,37 +182,26 @@ namespace dm
   {
     artist result;
 
-    kvstore_->each(
-      [](const std::string& key) -> bool
-      {
-        if ( key.length() == 6 && key[0] == 'a' && key[1] == 'r' ) {
-          return true;
-        }
-        else {
-          return false;
-        }
-      },
-      [&](json::value& value) -> bool
-      {
-        if ( value.is_object() )
-        {
-          auto& a           = value.as_object();
-          auto& artist_name = a["name"];
+    each([&](json::value& value) -> bool
+    {
+      auto& a           = value.as_object();
+      auto& artist_name = a["name"];
 
-          if ( artist_name.as_string() == name )
-          {
-            result = std::move(a);
-          }
-        }
-
+      if ( artist_name.as_string() == name )
+      {
+        result = std::move(a);
+        return false;
+      }
+      else
+      {
         return true;
       }
-    );
+    });
 
     return std::move(result);
   }
 
-  void artist::each(std::function<bool(artist& artist)> value_cb)
+  void artist::each(std::function<bool(json::value& value)> value_cb)
   {
     kvstore_->each(
       [](const std::string& key) -> bool
@@ -213,13 +215,20 @@ namespace dm
       },
       [&](json::value& value) -> bool
       {
-        if ( value.is_object() )
-        {
-          auto v = artist(std::move(value.as_object()));
-          value_cb(v);
+        if ( value.is_object() ) {
+          value_cb(value);
         }
         return true;
       }
     );
+  }
+
+  void artist::each(std::function<bool(artist& artist)> value_cb)
+  {
+    each([&](json::value& value) -> bool
+    {
+      auto v = artist(std::move(value.as_object()));
+      return value_cb(v);
+    });
   }
 }

@@ -29,4 +29,18 @@ namespace :spotify do
     end
   end
 
+  desc "Get album cover"
+  task :get_cover, [ :uri ] do |t, args|
+    uri = args[:uri] || fail("spotify uri required")
+    id  = uri.sub(/spotify:album:/, '')
+    open("https://api.spotify.com/v1/albums/#{id}") { |f|
+      json  = JSON.parse(f.read)
+      cover_url = json["images"][0]["url"]
+      p cover_url
+      open(cover_url) { |f|
+        File.open("cover.jpg", "w+") { |o| o.write(f.read) }
+      }
+    }
+  end
+
 end

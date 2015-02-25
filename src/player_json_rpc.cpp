@@ -570,6 +570,92 @@ save_error:
   }
 
   // --------------------------------------------------------------------------
+  json_rpc_response get_artists(const json_rpc_request& request)
+  {
+    json_rpc_response response{request};
+
+    if ( request.params().is_null() )
+    {
+      response.set_result(dm::artist::find_all());
+    }
+    else
+    {
+      response.invalid_params();
+    }
+
+    return response;
+  }
+
+  // --------------------------------------------------------------------------
+  json_rpc_response get_albums(const json_rpc_request& request)
+  {
+    json_rpc_response response{request};
+
+    if ( request.params().is_null() )
+    {
+      response.set_result(dm::album::find_all());
+    }
+    else
+    {
+      response.invalid_params();
+    }
+
+    return response;
+  }
+
+  // --------------------------------------------------------------------------
+  json_rpc_response get_album_tracks(const json_rpc_request& request)
+  {
+    json_rpc_response response{request};
+
+    if ( request.params().is_string() )
+    {
+      auto album = dm::album::find_by_id(request.params().as_string());
+
+      if ( !album.is_null() )
+      {
+        json::array res;
+
+        album.each_track([&](dm::track& track) -> bool
+        {
+          res.push_back(track.to_json());
+          return true;
+        });
+
+        response.set_result(std::move(res));
+      }
+      else
+      {
+        // TODO: Report error;
+        response.invalid_params();
+      }
+    }
+    else
+    {
+      response.invalid_params();
+    }
+
+    return response;
+  }
+
+  // --------------------------------------------------------------------------
+  json_rpc_response get_tracks(const json_rpc_request& request)
+  {
+    json_rpc_response response{request};
+
+    if ( request.params().is_null() )
+    {
+      response.set_result(dm::track::find_all());
+    }
+    else
+    {
+      response.invalid_params();
+    }
+
+    return response;
+  }
+
+  // --------------------------------------------------------------------------
   json_rpc_response local_scan(std::vector<std::string> dirs, const json_rpc_request& request)
   {
     json_rpc_response response{request};

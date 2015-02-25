@@ -78,8 +78,11 @@ namespace dm
   public:
     track_source find_source(const std::string& name="");
   public:
+    static json::array find_all();
+  public:
     static track find_by_id(const std::string& id);
   public:
+    static void each(std::function<bool(json::value& value)> value_cb);
     static void each(std::function<bool(track& track)> value_cb);
   private:
     json::object data_;

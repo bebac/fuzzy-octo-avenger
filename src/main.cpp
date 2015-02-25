@@ -124,6 +124,11 @@ void run(const options& options)
   service.add_method("db/cover",         std::bind(&json_rpc::cover,         _1));
   service.add_method("local/scan",       std::bind(&json_rpc::local_scan, options.local_source_dirs, _1));
 
+  service.add_method("db/get/artists",      std::bind(&json_rpc::get_artists,      _1));
+  service.add_method("db/get/albums",       std::bind(&json_rpc::get_albums,       _1));
+  service.add_method("db/get/album/tracks", std::bind(&json_rpc::get_album_tracks, _1));
+  service.add_method("db/get/tracks",       std::bind(&json_rpc::get_tracks,       _1));
+
   /////
   // Setup callback to get player state info. Note that the callback is
   // called from player thread context. The service send_notification method

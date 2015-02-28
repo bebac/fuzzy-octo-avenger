@@ -48,21 +48,19 @@ class local_source : public source_base
 {
   using audio_output_ptr = std::weak_ptr<audio_output_t>;
 public:
-  local_source(const std::string& dirname)
-    :
-    dirname_(dirname)
+  local_source()
   {
   }
 public:
   virtual void play(const std::string& uri, audio_output_ptr audio_output);
 public:
   json::value get_cover(const std::string& uri);
-private:
-  std::string dirname_;
 };
 
 // ----------------------------------------------------------------------------
+#if 0
 void import_flac_file(const std::string& filename);
+#endif
 
 // ----------------------------------------------------------------------------
 #endif // __local_source_h__

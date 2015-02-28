@@ -48,7 +48,6 @@ public:
   std::string spotify_username;
   std::string spotify_password;
   std::string audio_device;
-  std::vector<std::string> local_source_dirs;
 };
 
 // ----------------------------------------------------------------------------
@@ -100,11 +99,7 @@ void run(const options& options)
   };
 
   player.add_source("spotify", std::make_shared<spotify_source>(sp_cfg));
-
-  if ( options.local_source_dirs.size() > 0 )
-  {
-    player.add_source("local", std::make_shared<local_source>(options.local_source_dirs[0]));
-  }
+  player.add_source("local", std::make_shared<local_source>());
 
   using std::placeholders::_1;
   service.add_method("player/play",      std::bind(&json_rpc::play,                std::ref(player), _1));
@@ -122,12 +117,15 @@ void run(const options& options)
   service.add_method("db/delete",        std::bind(&json_rpc::erase,         _1));
   service.add_method("db/import-tracks", std::bind(&json_rpc::import_tracks, _1));
   service.add_method("db/cover",         std::bind(&json_rpc::cover,         _1));
-  service.add_method("local/scan",       std::bind(&json_rpc::local_scan, options.local_source_dirs, _1));
 
-  service.add_method("db/get/artists",      std::bind(&json_rpc::get_artists,      _1));
-  service.add_method("db/get/albums",       std::bind(&json_rpc::get_albums,       _1));
-  service.add_method("db/get/album/tracks", std::bind(&json_rpc::get_album_tracks, _1));
-  service.add_method("db/get/tracks",       std::bind(&json_rpc::get_tracks,       _1));
+  service.add_method("db/get/artists",      std::bind(&json_rpc::get_artists,        _1));
+  service.add_method("db/get/albums",       std::bind(&json_rpc::get_albums,         _1));
+  service.add_method("db/set/album",        std::bind(&json_rpc::set_album,          _1));
+  service.add_method("db/get/album/tracks", std::bind(&json_rpc::get_album_tracks,   _1));
+  service.add_method("db/get/tracks",       std::bind(&json_rpc::get_tracks,         _1));
+  service.add_method("db/get/source_local", std::bind(&json_rpc::get_source_local,   _1));
+  service.add_method("db/set/source_local", std::bind(&json_rpc::set_source_local,   _1));
+  service.add_method("sources/local/scan",  std::bind(&json_rpc::sources_local_scan, _1));
 
   /////
   // Setup callback to get player state info. Note that the callback is
@@ -193,26 +191,6 @@ void load_configuration(const std::string& filename, options& options)
 
     if ( conf["audio_device"].is_string() ) {
       options.audio_device = conf["audio_device"].as_string();
-    }
-
-    if ( conf["local_source"].is_object() )
-    {
-      auto local_source = conf["local_source"].as_object();
-
-      if ( local_source["directories"].is_array() )
-      {
-        auto dirs = local_source["directories"].as_array();
-
-        for ( auto& dir : dirs )
-        {
-          if ( dir.is_string() ) {
-            options.local_source_dirs.push_back(dir.as_string());
-          }
-          else {
-            throw std::runtime_error("local source directory must be a string!");
-          }
-        }
-      }
     }
   }
   catch (const std::exception& e)

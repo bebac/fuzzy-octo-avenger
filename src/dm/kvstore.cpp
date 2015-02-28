@@ -158,7 +158,11 @@ namespace dm
             std::cout << "error! retrieving value" << std::endl;
           }
 
-          value_cb(value);
+          bool continue_ = value_cb(value);
+
+          if ( !continue_ ) {
+            break;
+          }
         }
       }
       cur->step();

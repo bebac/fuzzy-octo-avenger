@@ -604,6 +604,40 @@ save_error:
   }
 
   // --------------------------------------------------------------------------
+  json_rpc_response set_album(const json_rpc_request& request)
+  {
+    json_rpc_response response{request};
+
+    if ( request.params().is_object() )
+    {
+      auto& params = request.params().as_object();
+      auto& id = params["id"];
+
+      if ( id.is_string() )
+      {
+        auto album = dm::album::find_by_id(id.as_string());
+
+        // TODO: Validate!
+
+        album.data(std::move(params));
+        album.save();
+
+        response.set_result("ok");
+      }
+      else
+      {
+        response.invalid_params();
+      }
+    }
+    else
+    {
+      response.invalid_params();
+    }
+
+    return response;
+  }
+
+  // --------------------------------------------------------------------------
   json_rpc_response get_album_tracks(const json_rpc_request& request)
   {
     json_rpc_response response{request};
@@ -656,20 +690,83 @@ save_error:
   }
 
   // --------------------------------------------------------------------------
-  json_rpc_response local_scan(std::vector<std::string> dirs, const json_rpc_request& request)
+  json_rpc_response get_source_local(const json_rpc_request& request)
   {
     json_rpc_response response{request};
 
-    for ( auto& dirname : dirs )
+    if ( request.params().is_null() )
     {
-      file_system::scan_dir(dirname, [&](const std::string& filename)
-      {
-        if ( file_system::extension(filename) == "flac" )
-        {
-          import_flac_file(filename);
-        }
-      });
+      dm::source_local source_local;
+      response.set_result(source_local.to_json());
     }
+    else
+    {
+      response.invalid_params();
+    }
+
+    return response;
+  }
+
+  // --------------------------------------------------------------------------
+  json_rpc_response set_source_local(const json_rpc_request& request)
+  {
+    json_rpc_response response{request};
+
+    if ( request.params().is_object() )
+    {
+      dm::source_local source_local;
+
+      auto& params = request.params().as_object();
+      auto& directories = params["directories"];
+
+      std::cerr << "set_source_local directories=" << directories << std::endl;
+
+      if ( directories.is_array() )
+      {
+        std::vector<std::string> new_dirs;
+
+        for ( auto& jsdir : directories.as_array() )
+        {
+          if ( jsdir.is_string() )
+          {
+            new_dirs.push_back(jsdir.as_string());
+          }
+          else
+          {
+            response.invalid_params();
+            return response;
+          }
+        }
+
+        source_local.directories(new_dirs);
+
+        response.set_result(source_local.to_json());
+      }
+      else
+      {
+        response.invalid_params();
+      }
+    }
+    else
+    {
+      response.invalid_params();
+    }
+
+    return response;
+  }
+
+  // --------------------------------------------------------------------------
+  json_rpc_response sources_local_scan(const json_rpc_request& request)
+  {
+    json_rpc_response response{request};
+
+    dm::source_local source_local;
+
+    std::cerr << "sources_local_scan begin" << std::endl;
+
+    source_local.scan();
+
+    std::cerr << "sources_local_scan end" << std::endl;
 
     response.set_result("ok");
 

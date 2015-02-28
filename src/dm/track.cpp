@@ -28,6 +28,11 @@ namespace dm
   {
   }
 
+  bool track_source::is_null()
+  {
+    return data_.empty();
+  }
+
   const std::string& track_source::name() const
   {
     return data_.at("name").as_string();
@@ -205,6 +210,30 @@ namespace dm
     }
   }
 
+  void track::source_remove(const std::string& name)
+  {
+    auto& sources = data_["sources"];
+
+    if ( sources.is_array() )
+    {
+      json::array new_sources;
+
+      for ( auto& obj : sources.as_array() )
+      {
+        auto& s = obj.as_object();
+
+        if ( s["name"].as_string() != name )
+        {
+          new_sources.push_back(s);
+        }
+      }
+      // Replace sources.
+      data_["sources"] = new_sources;
+      // Save track changes.
+      save();
+    }
+  }
+
   void track::save()
   {
     auto& id = data_["id"];
@@ -235,7 +264,19 @@ namespace dm
     {
       auto& sources = jsources.as_array();
 
-      return track_source{sources[0].as_object()};
+      if ( name.length() > 0 )
+      {
+        for ( auto& source : sources ) {
+          if ( source.as_object()["name"].as_string() == name ) {
+            return track_source{source.as_object()};
+          }
+        }
+        return track_source();
+      }
+      else
+      {
+        return track_source{sources[0].as_object()};
+      }
     }
     else
     {

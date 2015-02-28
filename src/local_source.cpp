@@ -223,6 +223,7 @@ json::value local_source::get_cover(const std::string& uri)
 }
 
 // --------------------------------------------------------------------------
+#if 0
 void import_flac_file(const std::string& filename)
 {
   //std::cerr << "import_flac_file " << filename << std::endl;
@@ -359,3 +360,4 @@ void import_flac_file(const std::string& filename)
     track.save();
   }
 }
+#endif

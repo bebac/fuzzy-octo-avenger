@@ -29,6 +29,8 @@ namespace dm
     track_source();
     track_source(json::object data);
   public:
+    bool is_null();
+  public:
     const std::string& name() const;
     const std::string& uri() const;
   private:
@@ -70,6 +72,7 @@ namespace dm
     void artist(const dm::artist& v);
     void album(const dm::album& v);
     void source(json::object&& jsource);
+    void source_remove(const std::string& name);
   public:
     void save();
     void erase();

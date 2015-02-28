@@ -64,6 +64,7 @@ namespace dm
     album(json::object&& data);
   public:
     bool is_null();
+    bool id_is_null();
   public:
     // Getters.
     const std::string& id()        const;
@@ -76,6 +77,7 @@ namespace dm
     void add_track(const track& track);
     void remove_track(const track& track);
     void member(const std::string& key, json::value&& value);
+    void data(json::object&& data);
   public:
     void save();
     void erase();

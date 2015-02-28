@@ -24,5 +24,6 @@ namespace dm
     dm::artist::init(kvstore_.get());
     dm::album::init(kvstore_.get());
     dm::track::init(kvstore_.get());
+    dm::source_local::init(kvstore_.get());
   }
 }

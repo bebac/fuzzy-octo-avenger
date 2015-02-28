@@ -22,6 +22,11 @@ namespace dm
   kvstore* album_cover::kvstore_ = nullptr;
   kvstore* album::kvstore_       = nullptr;
 
+  const std::string id_member      = "id";
+  const std::string title_member   = "title";
+  const std::string tracks_member  = "tracks";
+  const std::string no_disc_id     = "";
+
   album_cover::album_cover(const album& album)
     :
     key_(album.id()+"/cover")
@@ -38,6 +43,11 @@ namespace dm
   bool album_cover::is_null()
   {
     return data_.empty();
+  }
+
+  bool album::id_is_null()
+  {
+    return data_["id"].is_null();
   }
 
   void album_cover::format(const std::string& v)
@@ -111,26 +121,26 @@ namespace dm
 
   const std::string& album::id() const
   {
-    return data_.at("id").as_string();
+    return data_.at(id_member).as_string();
   }
 
   const std::string& album::title() const
   {
-    return data_.at("title").as_string();
+    return data_.at(title_member).as_string();
   }
 
   void album::title(const std::string& v)
   {
-    data_["title"] = v;
+    data_[title_member] = v;
   }
 
   album::track_id_list album::track_ids() const
   {
     track_id_list result;
 
-    if ( data_.has_member("tracks") )
+    if ( data_.has_member(tracks_member) )
     {
-      auto& tracks = data_.at("tracks");
+      auto& tracks = data_.at(tracks_member);
 
       assert(tracks.is_array());
 
@@ -150,7 +160,7 @@ namespace dm
 
   void album::add_track(const track& track)
   {
-    auto& jtracks = data_["tracks"];
+    auto& jtracks = data_[tracks_member];
 
     if ( jtracks.is_array() )
     {
@@ -170,7 +180,7 @@ namespace dm
 
   void album::remove_track(const track& track)
   {
-    auto& jtracks = data_["tracks"];
+    auto& jtracks = data_[tracks_member];
 
     if ( jtracks.is_array() )
     {
@@ -194,7 +204,7 @@ namespace dm
 
   void album::save()
   {
-    auto& id = data_["id"];
+    auto& id = data_[id_member];
 
     if ( id.is_null() ) {
       id = album::kvstore_->create_album_key();
@@ -203,12 +213,17 @@ namespace dm
     kvstore_->set(id.as_string(), data_);
   }
 
+  void album::data(json::object&& data)
+  {
+    data_ = std::move(data);
+  }
+
   void album::erase()
   {
     // Make sure to remove album references from artists before calling
     // album::erase.
 
-    auto& id = data_["id"];
+    auto& id = data_[id_member];
 
     if ( !id.is_null() )
     {
@@ -289,9 +304,11 @@ namespace dm
       [&](json::value& value) -> bool
       {
         if ( value.is_object() ) {
-          value_cb(value);
+          return value_cb(value);
         }
-        return true;
+        else {
+          return true;
+        }
       }
     );
 

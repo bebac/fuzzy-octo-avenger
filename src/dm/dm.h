@@ -17,7 +17,7 @@
 #include "artist.h"
 #include "album.h"
 #include "track.h"
-
+#include "source_local.h"
 
 // ----------------------------------------------------------------------------
 namespace dm

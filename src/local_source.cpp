@@ -286,11 +286,21 @@ void import_flac_file(const std::string& filename)
     {
       if ( field.first == "TRACK NUMBER" || field.first == "TRACKNUMBER" )
       {
-        track.track_number(std::stoi(field.second[0].to8Bit()));
+        if ( field.second.size() > 0 ) {
+          track.track_number(std::stoi(field.second[0].to8Bit()));
+        }
+        else {
+          std::cerr << "field='" << field.first << "' string list size=" << field.second.size() << std::endl;
+        }
       }
       else if ( field.first == "DISC NUMBER" || field.first == "DISCNUMBER" )
       {
-        track.disc_number(std::stoi(field.second[0].to8Bit()));
+        if ( field.second.size() > 0 ) {
+          track.disc_number(std::stoi(field.second[0].to8Bit()));
+        }
+        else {
+          std::cerr << "field='" << field.first << "' string list size=" << field.second.size() << std::endl;
+        }
       }
       else if ( field.first == "REPLAYGAIN_REFERENCE_LOUDNESS" )
       {

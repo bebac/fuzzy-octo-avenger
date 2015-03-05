@@ -1,0 +1,9 @@
+<div>
+  <%= album.title %>
+</div>
+<div>
+  <img src="<%= album.cover_url %>">
+</div>
+<div>
+  <%= album.artist_name %>
+</div>

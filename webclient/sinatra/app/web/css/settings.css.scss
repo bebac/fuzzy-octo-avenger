@@ -1,0 +1,58 @@
+.settings-container
+{
+  width: 100%;
+
+  button, input
+  {
+    padding: 0.33em;
+    margin: 0.33em;
+    font-size: 1em;
+  }
+
+  button {
+    /*float: right;*/
+    width: 25%;
+  }
+
+  input {
+    width: 50%;
+  }
+
+  ul {
+    list-style: none;
+  }
+
+  table
+  {
+    background-color: #eee;
+    width: 100%;
+
+    border-collapse: collapse;
+
+    td
+    {
+      padding: 0.5em;
+      border: 2px solid #fff;
+    }
+
+    td:nth-child(1)
+    {
+      width: 25%;
+      /*border-right: 5px solid #fff;*/
+      vertical-align: top;
+      /*text-align: right;*/
+      font-size: 1.66em;
+    }
+
+    td:nth-child(2)
+    {
+      width: 50%;
+      /*border-right: 5px solid #fff;*/
+    }
+
+    td:nth-child(3)
+    {
+      vertical-align: top;
+    }
+  }
+}

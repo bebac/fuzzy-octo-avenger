@@ -1,0 +1,85 @@
+/*= require album_thumb */
+/*= require album_details */
+/*= require settings */
+
+html, body, h1, h2, h3, h4, p, div, li, ul {
+  margin: 0 0 0 0;
+  padding: 0 0 0 0;
+}
+
+html {
+  font-family: sans-serif;
+}
+
+#nav-container
+{
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 100;
+}
+
+#nav
+{
+  position: relative;
+  top: 0;
+  /*width: 100%;*/
+  padding: 1em;
+  background-color: #666;
+
+  a {
+    color: #bbb;
+    text-decoration: none;
+    font-weight: bold;
+  }
+
+  a.selected {
+    color: #ddd;
+  }
+
+  li {
+    display: inline-block;
+  }
+
+  li:last-child {
+    float: right;
+  }
+}
+
+#nav-spacer {
+  position: relative;
+  top: 0;
+  height: 100%;
+  border: 5px solid #000;
+}
+
+#view-container {
+  position: relative;
+}
+
+#album-thumbs
+{
+  margin: 0px auto;
+  text-align: center;
+}
+
+#album-details-container {
+  color: #000;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  overflow: auto;
+  width: 100%;
+  display: none;
+  background:rgba(0,0,0,0.8);
+  z-index: 100;
+}
+
+#album-details {
+  width: 60%;
+  padding: 2em;
+  margin: 0px auto;
+  color: #666;
+  background-color: #fff
+}
+

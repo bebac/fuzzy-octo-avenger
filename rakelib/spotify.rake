@@ -1,6 +1,6 @@
 require 'json'
 
-require_relative '../webclient/sinatra/source/spotify-album-importer'
+require_relative '../webclient/sinatra/app/srv/spotify-album-importer'
 
 namespace :spotify do
 

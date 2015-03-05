@@ -2,7 +2,7 @@ require 'rubygems'
 require 'json'
 require 'eventmachine'
 
-module SpotiHifi
+module MusicBox
 
   class Request
 
@@ -33,7 +33,7 @@ module SpotiHifi
 
   end
 
-  class Client < EventMachine::Connection
+  class Connection < EventMachine::Connection
 
     def initialize(ip, port)
       puts "init client #{ip}:#{port}"

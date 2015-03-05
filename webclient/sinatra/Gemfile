@@ -1,15 +1,9 @@
 source 'https://rubygems.org'
 
-gem 'rack'
 gem 'sinatra'
-gem 'sprockets'
-
-#gem 'json'
-gem 'coffee-script'
-gem 'therubyracer'  unless RUBY_ENGINE =~ /jruby|rbx/
 gem 'thin'
 
-group :development do
-  gem 'shotgun'
-  # gem 'pry'
-end
+gem 'opal'
+gem 'opal-jquery'
+gem 'opal-vienna'
+gem 'sass'

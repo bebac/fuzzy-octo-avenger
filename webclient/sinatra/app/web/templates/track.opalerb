@@ -1,0 +1,34 @@
+<div>
+  <%= "%02d" % [ track.tn ] %>
+</div>
+
+<div class="title">
+  <div>
+    <%= track.title %><span class="track-show-details">+</span>
+  </div>
+
+  <div class="track-details" style="display:none">
+    <div>
+      <input class="tag-edit" type="text" value="<%= track.tags.join(',') if track.tags %>">
+    </div>
+    <!--<div style="font-size:0.66em">
+      #<%= track.id %>
+    </div>-->
+  </div>
+</div>
+
+<div class="action-status">
+  <%= qid if qid %>
+</div>
+
+<div class="duration">
+  <%= track.duration_formatted %>
+</div>
+
+<div class="tags">
+  <% if track.tags %>
+    <% track.tags.each do |tag| %>
+      <span class="tag"><%= tag %></span>
+    <% end %>
+  <% end %>
+</div>

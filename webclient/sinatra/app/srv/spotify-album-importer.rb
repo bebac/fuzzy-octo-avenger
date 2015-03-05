@@ -3,7 +3,7 @@ require 'json'
 require 'ostruct'
 require 'base64'
 
-require_relative './em-spotihifi-client'
+require_relative './music_box'
 
 module Spotify
 
@@ -113,7 +113,7 @@ module Spotify
 
     def save_track(tracks)
       EventMachine.run {
-        client = EventMachine::connect @ip, 8212, SpotiHifi::Client, @ip, 8212
+        client = EventMachine::connect @ip, 8212, MusicBox::Connection, @ip, 8212
 
         client.invoke("db/import-tracks", tracks) do |req|
           req.timeout 60

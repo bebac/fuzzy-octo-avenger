@@ -1,0 +1,14 @@
+<table>
+  <tr>
+    <td>Local Source</td>
+    <td>
+      <button id="scan">Scan</button>
+      <ul id="directories">
+      </ul>
+      <button id="add">Add Directory</button>
+    </td>
+    <td>
+      Local source settings.
+    </td>
+  </tr>
+</table>

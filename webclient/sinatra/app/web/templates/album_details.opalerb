@@ -1,0 +1,11 @@
+<div class="cover">
+  <img src="<%= album.cover_url %>">
+  <br>
+</div>
+
+<h1><%= album.title %></h1>
+<h2><%= album.artist_name %></h2>
+
+<hr>
+
+<ol class="track-list"></ol>

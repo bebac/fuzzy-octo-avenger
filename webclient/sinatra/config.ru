@@ -1,17 +1,27 @@
 #\ -p 8213
 
-require 'sprockets'
-require './source/application'
+require 'bundler'
+Bundler.require
 
-map '/assets' do
-  environment = Sprockets::Environment.new do |env|
-    env.append_path 'source/javascript'
-    env.append_path 'source/css'
-    env.append_path 'source/images'
-  end
-  run environment
+opal = Opal::Server.new {|s|
+  s.append_path 'app/web'
+  s.append_path 'app/web/css'
+  s.append_path 'app/web/javascript'
+  s.main = 'application'
+  #s.debug = true
+}
+
+map opal.source_maps.prefix do
+  run opal.source_maps
 end
 
+map '/assets' do
+  run opal.sprockets
+end
+
+require './app/srv/application'
+
+#run Sinatra::Application
 map '/' do
   run TestApp::Main
 end

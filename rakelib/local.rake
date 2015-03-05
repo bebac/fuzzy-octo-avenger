@@ -1,4 +1,4 @@
-require_relative '../webclient/sinatra/source/em-spotihifi-client'
+require_relative '../webclient/sinatra/app/srv/music_box'
 
 namespace :local do
 
@@ -7,7 +7,7 @@ namespace :local do
     ip = args[:ip] || fail("ip address required")
 
     EventMachine.run {
-      client = EventMachine::connect ip, 8212, SpotiHifi::Client, ip, 8212
+      client = EventMachine::connect ip, 8212, MusicBox::Connection, ip, 8212
 
       client.invoke("sources/local/scan", []) do |req|
         req.timeout 240

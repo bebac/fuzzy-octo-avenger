@@ -2,6 +2,165 @@ require_relative '../webclient/sinatra/source/em-spotihifi-client'
 
 namespace :db do
 
+  class MusicBoxTrack < OpenStruct
+
+    def spotify_source
+      sources.each do |src|
+        if src["name"] == "spotify"
+          return src
+        end
+      end
+      nil
+    end
+
+  end
+
+  class MusicBoxAlbum < OpenStruct
+  end
+
+  class MusicBox
+
+    def initialize(ip, port=8212)
+      @ip = ip
+      @port = port
+    end
+
+    def artists
+      res = []
+      EventMachine.run {
+        client = EventMachine::connect @ip, @port, SpotiHifi::Client, @ip, @port
+
+        client.invoke("db/get/artists", nil) do |req|
+          req.timeout 2
+
+          req.callback do |result|
+            res = result
+            EventMachine.stop
+          end
+
+          req.errback do |error|
+            EventMachine.stop
+            raise error
+          end
+        end
+      }
+      res
+    end
+
+    def albums
+      res = []
+      EventMachine.run {
+        client = EventMachine::connect @ip, @port, SpotiHifi::Client, @ip, @port
+
+        client.invoke("db/get/albums", nil) do |req|
+          req.timeout 2
+
+          req.callback do |result|
+            res = result
+            EventMachine.stop
+          end
+
+          req.errback do |error|
+            EventMachine.stop
+            raise error
+          end
+        end
+      }
+      res
+    end
+
+    def album_tracks(album_id)
+      res = []
+      EventMachine.run {
+        client = EventMachine::connect @ip, @port, SpotiHifi::Client, @ip, @port
+
+        client.invoke("db/get/album/tracks", album_id) do |req|
+          req.timeout 2
+
+          req.callback do |result|
+            result.each do |track|
+              res << MusicBoxTrack.new(track)
+            end
+            EventMachine.stop
+          end
+
+          req.errback do |error|
+            EventMachine.stop
+            raise error
+          end
+        end
+      }
+      res
+    end
+
+    def save_album(album)
+      res = nil
+      EventMachine.run {
+        client = EventMachine::connect @ip, @port, SpotiHifi::Client, @ip, @port
+
+        client.invoke("db/set/album", album) do |req|
+          req.timeout 2
+
+          req.callback do |result|
+            res = result
+            EventMachine.stop
+          end
+
+          req.errback do |error|
+            EventMachine.stop
+            res = error
+          end
+        end
+      }
+      res
+    end
+
+    def tracks
+      res = nil
+      EventMachine.run {
+        client = EventMachine::connect @ip, @port, SpotiHifi::Client, @ip, @port
+
+        client.invoke("db/get/tracks", nil) do |req|
+          req.timeout 2
+
+          req.callback do |result|
+            res = result
+            EventMachine.stop
+          end
+
+          req.errback do |error|
+            res = error
+            EventMachine.stop
+          end
+        end
+      }
+      res
+    end
+
+    def delete(id)
+      res = nil
+      EventMachine.run {
+        client = EventMachine::connect @ip, @port, SpotiHifi::Client, @ip, @port
+
+        client.invoke("db/delete", [ id ]) do |req|
+          req.timeout 2
+
+          req.callback do |result|
+            res = result
+            EventMachine.stop
+          end
+
+          req.errback do |error|
+            res = error
+            EventMachine.stop
+          end
+        end
+      }
+      res
+    end
+
+  end
+
   def spotihifi_call(ip, method, params=nil)
     EventMachine.run {
       client = EventMachine::connect ip, 8212, SpotiHifi::Client, ip, 8212
@@ -66,75 +225,46 @@ namespace :db do
   task :artists, [ :ip ] do |t, args|
     ip = args[:ip] || fail("ip address required")
 
-    EventMachine.run {
-      client = EventMachine::connect ip, 8212, SpotiHifi::Client, ip, 8212
+    artists = MusicBox.new(ip).artists
 
-      client.invoke("db/get/artists", nil) do |req|
-        req.timeout 2
-
-        req.callback do |result|
-          result.each do |track|
-            puts JSON.pretty_generate(track)
-          end
-          EventMachine.stop
-        end
-
-        req.errback do |error|
-          p error
-          EventMachine.stop
-        end
-      end
-    }
+    artists.each do |artist|
+      p artist
+    end
   end
 
   desc "Get albums"
   task :albums, [ :ip ] do |t, args|
     ip = args[:ip] || fail("ip address required")
 
-    EventMachine.run {
-      client = EventMachine::connect ip, 8212, SpotiHifi::Client, ip, 8212
+    albums = MusicBox.new(ip).albums
 
-      client.invoke("db/get/albums", nil) do |req|
-        req.timeout 2
-
-        req.callback do |result|
-          result.each do |album|
-            p album
-          end
-          EventMachine.stop
-        end
-
-        req.errback do |error|
-          p error
-          EventMachine.stop
-        end
-      end
-    }
+    albums.each do |album|
+      p album
+    end
   end
+
+  desc "Get albums"
+  task :album_tracks, [ :ip, :id ] do |t, args|
+    ip = args[:ip] || fail("ip address required")
+    id = args[:id] || fail("album id required")
+
+    tracks = MusicBox.new(ip).album_tracks(id)
+
+    tracks.each do |track|
+      p track
+    end
+  end
+
 
   desc "Get tracks"
   task :tracks, [ :ip ] do |t, args|
     ip = args[:ip] || fail("ip address required")
 
-    EventMachine.run {
-      client = EventMachine::connect ip, 8212, SpotiHifi::Client, ip, 8212
+    tracks = MusicBox.new(ip).tracks
 
-      client.invoke("db/get/tracks", nil) do |req|
-        req.timeout 2
-
-        req.callback do |result|
-          result.each do |track|
-            puts JSON.pretty_generate(track)
-          end
-          EventMachine.stop
-        end
-
-        req.errback do |error|
-          p error
-          EventMachine.stop
-        end
-      end
-    }
+    tracks.each do |track|
+      p track
+    end
   end
 
 end

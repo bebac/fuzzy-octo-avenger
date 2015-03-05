@@ -59,15 +59,29 @@ module Spotify
       return cover
     end
 
-    def make_mbox_track(track, album, artist, cover)
+    def make_mbox_track(track, album, cover)
+      album_artist = Artist.new(album.artists[0])
+      track_artist = Artist.new(track.artists[0])
       {
         :title    => track.name,
-        :artist   => { :name => artist.name },
-        :album    => { :title => album.name },
+        :artist   => {
+          :name       => track_artist.name,
+          :spotify_id => track_artist.id },
+        :album    => {
+          :title      => album.name,
+          :spotify_id => album.id,
+          :artist     => {
+            :name => album_artist.name,
+            :spotify_id => album_artist.id
+          }
+        },
         :tn       => track.track_number,
         :dn       => track.disc_number,
         :duration => track.duration_ms/1000,
-        :source   => { :name => "spotify", :uri => track.uri },
+        :source   => {
+          :name => "spotify",
+          :uri => track.uri
+        },
         :cover    => cover
       }
     end
@@ -78,18 +92,17 @@ module Spotify
         json  = JSON.parse(f.read)
 
         album  = Album.new(json)
-        artist = Artist.new(album.artists[0])
         cover  = load_cover(album.images[0]["url"])
 
         album.tracks["items"].each do |item|
-          tracks << make_mbox_track(Track.new(item), album, artist, cover)
+          tracks << make_mbox_track(Track.new(item), album, cover)
         end
 
         if album.tracks["next"]
           open(album.tracks["next"]) { |file_next|
             json = JSON.parse(file_next.read)
             json["items"].each do |item|
-              tracks << make_mbox_track(Track.new(item), album, artist, cover)
+              tracks << make_mbox_track(Track.new(item), album, cover)
             end
           }
         end

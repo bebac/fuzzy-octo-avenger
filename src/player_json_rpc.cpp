@@ -408,151 +408,198 @@ save_error:
 #endif
 
   // --------------------------------------------------------------------------
+  void import_json_track(json::object& track_obj)
+  {
+    /////
+    // Validate track json
+
+    if ( !track_obj["artist"].is_object() ) {
+      throw std::runtime_error("track artist must be object");
+    }
+
+    if ( !track_obj["album"].is_object() ) {
+      throw std::runtime_error("track album must be object");
+    }
+
+    if ( !track_obj["title"].is_string() ) {
+      throw std::runtime_error("track title must be string");
+    }
+
+    if ( !track_obj["tn"].is_number() ) {
+      throw std::runtime_error("track tn must be number");
+    }
+
+    if ( !track_obj["dn"].is_number() ) {
+      throw std::runtime_error("track dn must be number");
+    }
+
+    if ( !track_obj["duration"].is_number() ) {
+      throw std::runtime_error("track duration must be number");
+    }
+
+    if ( !track_obj["source"].is_object() ) {
+      throw std::runtime_error("track source must be object");
+    }
+
+    auto& track_source_obj = track_obj["source"].as_object();
+
+    if ( !track_source_obj["name"].is_string() ) {
+      throw std::runtime_error("track source name must be string");
+    }
+
+    if ( !track_source_obj["uri"].is_string() ) {
+      throw std::runtime_error("track source uri must be string");
+    }
+
+    auto& track_artist_obj = track_obj["artist"].as_object();
+
+    if ( !track_artist_obj["name"].is_string() ) {
+      throw std::runtime_error("track artist name must be string");
+    }
+
+    auto& album_obj = track_obj["album"].as_object();
+
+    if ( !album_obj["artist"].is_object() ) {
+      throw std::runtime_error("album artist must be object");
+    }
+
+    if ( !album_obj["title"].is_string() ) {
+      throw std::runtime_error("album title must be string");
+    }
+
+    auto& album_artist_obj = album_obj["artist"].as_object();
+
+    if ( !album_artist_obj["name"].is_string() ) {
+      throw std::runtime_error("album artist name must be string");
+    }
+
+    auto& track_artist_name = track_artist_obj["name"].as_string();
+    auto& album_artist_name = album_artist_obj["name"].as_string();
+
+    /////
+    // Update / create album artist.
+
+    auto album_artist = dm::artist::find_by_name(album_artist_name);
+
+    if ( album_artist.is_null() )
+    {
+      // Create artist.
+      album_artist.name(album_artist_name);
+      album_artist.save();
+      std::cerr << "created artist " << album_artist.name() << " id " << album_artist.id() << std::endl;
+    }
+
+    /////
+    // Update / create track artist.
+
+    auto track_artist = dm::artist::find_by_name(track_artist_name);
+
+    if ( track_artist.is_null() )
+    {
+      // Create artist.
+      track_artist.name(track_artist_name);
+      track_artist.save();
+      std::cerr << "created artist " << track_artist.name() << " id " << track_artist.id() << std::endl;
+    }
+
+    auto& album_title = album_obj["title"].as_string();
+
+    /////
+    // Update / Create album.
+
+    auto album = album_artist.find_album_by_title(album_title);
+
+    // Set / update album artist.
+    album.member("artist", json::object{
+      { "id",   album_artist.id() },
+      { "name", album_artist.name() }
+    });
+
+    // Set / update spotify id.
+    if ( album_obj["spotify_id"].is_string() ) {
+      album.member("spotify_id", album_obj["spotify_id"].as_string());
+    }
+
+    if ( album.id_is_null() )
+    {
+      // Create album.
+      album.title(album_title);
+      album.save();
+      std::cerr << "created album " << album.title() << " id " << album.id() << std::endl;
+      // Add album to artist albums.
+      album_artist.add_album(album);
+      album_artist.save();
+    }
+    else
+    {
+      album.save();
+    }
+
+    auto track_title = track_obj["title"].as_string();
+
+    /////
+    // Update / create track.
+
+    auto track = album.find_track_by_title_and_number(track_title, track_obj["tn"].as_number());
+
+    track.title(track_title);
+    track.track_number(track_obj["tn"].as_number());
+    track.disc_number(track_obj["dn"].as_number());
+    track.duration(track_obj["duration"].as_number());
+    track.artist(track_artist);
+    track.album(album);
+    track.source(std::move(track_source_obj));
+
+    if ( track.id_is_null() )
+    {
+      // Create track id.
+      track.save();
+      // Add new track to album.
+      album.add_track(track);
+      album.save();
+
+      std::cout << album.to_json() << std::endl;
+    }
+    else
+    {
+      track.save();
+    }
+
+    /////
+    // Update / create cover.
+
+    auto& cover_obj = track_obj["cover"];
+
+    if ( cover_obj.is_object() )
+    {
+      auto cover = dm::album_cover::find_by_album_id(album.id());
+
+      if ( cover.is_null() )
+      {
+        cover.data(std::move(cover_obj.as_object()));
+        cover.save();
+      }
+    }
+    else
+    {
+      std::cerr << "json no cover!" << std::endl;
+    }
+  }
+
+  // --------------------------------------------------------------------------
   json_rpc_response import_tracks(const json_rpc_request& request)
   {
     json_rpc_response response{request};
 
     if ( request.params().is_array() )
     {
-      auto& jtracks = request.params().as_array();
+      auto& tracks_arr = request.params().as_array();
 
-      for ( auto& jt : jtracks )
+      for ( auto& item : tracks_arr )
       {
-        if ( jt.is_object() )
+        if ( item.is_object() )
         {
-          auto& track_obj = jt.as_object();
-
-          auto& jartist = track_obj["artist"];
-          auto& jalbum  = track_obj["album"];
-
-          if ( !jartist.is_object() ) {
-            throw std::runtime_error("invalid artist");
-          }
-
-          if ( !jalbum.is_object() ) {
-            throw std::runtime_error("invalid album");
-          }
-
-          auto& artist_obj   = jartist.as_object();
-          auto& album_obj    = jalbum.as_object();
-          auto& jtrack_title = track_obj["title"];
-          auto& jartist_name = artist_obj["name"];
-          auto& jalbum_title = album_obj["title"];
-
-          if ( !jtrack_title.is_string() ) {
-            throw std::runtime_error("invalid track title");
-          }
-
-          if ( !jartist_name.is_string() ) {
-            throw std::runtime_error("invalid artist name");
-          }
-
-          if ( !jalbum_title.is_string() ) {
-            throw std::runtime_error("invalid album title");
-          }
-
-          auto track_title = jtrack_title.as_string();
-          auto artist_name = jartist_name.as_string();
-          auto album_title = jalbum_title.as_string();
-
-          auto artist = dm::artist::find_by_name(artist_name);
-
-          if ( artist.is_null() )
-          {
-            // Create artist.
-            artist.name(artist_name);
-            artist.save();
-            std::cerr << "created artist " << artist.name() << " id " << artist.id() << std::endl;
-          }
-
-          auto album = artist.find_album_by_title(album_title);
-
-          if ( album.is_null() )
-          {
-            // Create album.
-            album.title(album_title);
-            album.save();
-            std::cerr << "created album " << album.title() << " id " << album.id() << std::endl;
-            // Add album to artist albums.
-            artist.add_album(album);
-            artist.save();
-          }
-
-          auto& tn = track_obj["tn"];
-
-          if ( !tn.is_number() ) {
-            throw std::runtime_error("invalid track_number");
-          }
-
-          auto track = album.find_track_by_title_and_number(track_title, tn.as_number());
-
-          track.title(track_title);
-          track.track_number(tn.as_number());
-
-          auto& dn = track_obj["dn"];
-          if ( dn.is_number() )
-          {
-            track.disc_number(dn.as_number());
-          }
-
-          auto& duration = track_obj["duration"];
-          if ( duration.is_number() )
-          {
-            track.duration(duration.as_number());
-          }
-
-          auto& cover_obj = track_obj["cover"];
-          if ( cover_obj.is_object() )
-          {
-            auto cover = dm::album_cover::find_by_album_id(album.id());
-
-            if ( cover.is_null() )
-            {
-              cover.data(std::move(cover_obj.as_object()));
-              cover.save();
-            }
-            else
-            {
-            }
-          }
-          else
-          {
-            std::cerr << "json no cover!" << std::endl;
-          }
-
-          track.artist(artist);
-          track.album(album);
-
-          auto& source_obj = track_obj["source"];
-          if ( source_obj.is_object() )
-          {
-            track.source(std::move(source_obj.as_object()));
-          }
-          else
-          {
-            //ERROR!
-          }
-
-          auto& spotify = album_obj["spotify"];
-          if ( !spotify.is_null() )
-          {
-            album.member("spotify", std::move(spotify));
-          }
-
-          if ( track.id_is_null() )
-          {
-            // Create track id.
-            track.save();
-            // Add new track to album.
-            album.add_track(track);
-            album.save();
-
-            std::cout << album.to_json() << std::endl;
-          }
-          else
-          {
-            track.save();
-          }
+          import_json_track(item.as_object());
         }
         else
         {

@@ -14,6 +14,7 @@
 
 // ----------------------------------------------------------------------------
 #include "kvstore.h"
+#include "track_alt_index.h"
 #include "artist.h"
 #include "album.h"
 
@@ -64,6 +65,7 @@ namespace dm
     dm::album album() const;
   public:
     // Setters.
+    void alt_id(const std::string& id);
     void title(const std::string& v);
     void track_number(unsigned v);
     void disc_number(unsigned v);
@@ -84,13 +86,15 @@ namespace dm
     static json::array find_all();
   public:
     static track find_by_id(const std::string& id);
+    static track find_by_alt_id(const std::string& alt_id);
   public:
-    static void each(std::function<bool(json::value& value)> value_cb);
+    static void each(std::function<bool(json::object& value)> value_cb);
     static void each(std::function<bool(track& track)> value_cb);
   private:
     json::object data_;
   private:
-    static kvstore* kvstore_;
+    static kvstore*        kvstore_;
+    static track_alt_index index_;
   };
 }
 

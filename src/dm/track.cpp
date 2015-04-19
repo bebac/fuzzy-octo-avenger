@@ -14,7 +14,8 @@
 
 namespace dm
 {
-  kvstore* track::kvstore_ = nullptr;
+  kvstore*        track::kvstore_ = nullptr;
+  track_alt_index track::index_;
 
   track_source::track_source()
     :
@@ -46,6 +47,21 @@ namespace dm
   void track::init(kvstore* store)
   {
     track::kvstore_ = store;
+
+    // Build alt id index.
+    track::each([&](json::object& value) -> bool
+    {
+      auto& alt_ids = value["alt_ids"];
+
+      if ( alt_ids.is_array() )
+      {
+        for ( auto& alt_id : alt_ids.as_array() )
+        {
+          index_.set(alt_id.as_string(), value["id"].as_string());
+        }
+      }
+      return true;
+    });
   }
 
   track::track()
@@ -124,6 +140,28 @@ namespace dm
     }
     else {
       return json::array();
+    }
+  }
+
+  void track::alt_id(const std::string& id)
+  {
+    auto& alt_ids = data_["alt_ids"];
+
+    if ( alt_ids.is_array() )
+    {
+      auto& arr = alt_ids.as_array();
+
+      for ( auto& alt_id : arr )
+      {
+        if ( alt_id.as_string() == id ) {
+          return;
+        }
+      }
+      arr.push_back(id);
+    }
+    else
+    {
+      data_["alt_ids"] = json::array{id};
     }
   }
 
@@ -288,7 +326,7 @@ namespace dm
   {
     json::array res;
 
-    track::each([&](json::value& value) -> bool
+    track::each([&](json::object& value) -> bool
     {
       res.push_back(std::move(value));
       return true;
@@ -311,7 +349,19 @@ namespace dm
     }
   }
 
-  void track::each(std::function<bool(json::value& value)> value_cb)
+  track track::find_by_alt_id(const std::string& alt_id)
+  {
+    std::string id;
+
+    if ( index_.get(alt_id, &id) ) {
+      return find_by_id(id);
+    }
+    else {
+      return std::move(track());
+    }
+  }
+
+  void track::each(std::function<bool(json::object& value)> value_cb)
   {
     kvstore_->each(
       [](const std::string& key) -> bool
@@ -326,7 +376,7 @@ namespace dm
       [&](json::value& value) -> bool
       {
         if ( value.is_object() ) {
-          value_cb(value);
+          value_cb(value.as_object());
         }
         return true;
       }
@@ -336,9 +386,9 @@ namespace dm
 
   void track::each(std::function<bool(track& track)> value_cb)
   {
-    each([&](json::value& value) -> bool
+    each([&](json::object& value) -> bool
     {
-      auto v = track(std::move(value.as_object()));
+      auto v = track(std::move(value));
       return value_cb(v);
     });
   }

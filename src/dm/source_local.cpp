@@ -103,7 +103,6 @@ namespace dm
       {
         if ( file_system::extension(filename) == "flac" )
         {
-          //std::cerr << "source_local::scan " << " filename=" << filename << std::endl;
           auto track = scan_flac_file(filename);
 
           if ( !track.is_null() )
@@ -124,7 +123,6 @@ namespace dm
 
     for ( auto& id : local_track_ids )
     {
-      // TODO: Remove local source from track.
       if ( id.second == false )
       {
         auto track = dm::track::find_by_id(id.first);
@@ -148,6 +146,8 @@ namespace dm
       std::string tag_artist;
       std::string tag_album;
       std::string tag_album_artist;
+      std::string tag_disc_id;
+      std::string alt_id;
 
       json::object replaygain;
 
@@ -178,6 +178,9 @@ namespace dm
           else if ( (field.first == "DISC NUMBER" || field.first == "DISCNUMBER") && field.second.size() > 0 ) {
             tag_dn = std::stoi(field.second[0].to8Bit());
           }
+          else if ( field.first == "DISCID" && field.second.size() > 0 ) {
+            tag_disc_id = field.second[0].to8Bit(true);
+          }
           else if ( field.first == "REPLAYGAIN_REFERENCE_LOUDNESS" )
           {
             auto ref_loudness = std::stod(field.second[0].to8Bit());
@@ -191,94 +194,115 @@ namespace dm
         }
       }
 
+      dm::track  track;
       dm::artist artist;
       dm::artist album_artist;
       dm::album  album;
 
       /////
-      // Find/create artist.
+      // Find track by DISCID/DISCNUMBER/TRACKNUMBER
 
-      if ( tag_album_artist.length() > 0 )
+      if ( tag_disc_id.length() > 0 )
       {
-        album_artist = dm::artist::find_by_name(tag_album_artist);
-
-        if ( album_artist.is_null() )
-        {
-          // Create artist.
-          album_artist.name(tag_album_artist);
-          album_artist.save();
-        }
+        alt_id = tag_disc_id+"/"+to_string(tag_dn)+"/"+to_string(tag_tn);
+        track = track.find_by_alt_id(alt_id);
       }
 
-      if ( tag_artist.length() > 0 )
+      if ( !track.is_null() )
       {
-        artist = dm::artist::find_by_name(tag_artist);
+        artist = track.artist();
+        album = track.album();
+      }
+      else
+      {
+        /////
+        // Find/create artist.
+
+        if ( tag_album_artist.length() > 0 )
+        {
+          album_artist = dm::artist::find_by_name(tag_album_artist);
+
+          if ( album_artist.is_null() )
+          {
+            // Create artist.
+            album_artist.name(tag_album_artist);
+            album_artist.save();
+          }
+        }
+
+        if ( tag_artist.length() > 0 )
+        {
+          artist = dm::artist::find_by_name(tag_artist);
+
+          if ( artist.is_null() )
+          {
+            // Create artist.
+            artist.name(tag_artist);
+            artist.save();
+          }
+        }
 
         if ( artist.is_null() )
         {
-          // Create artist.
-          artist.name(tag_artist);
-          artist.save();
+          // TODO: Error?
         }
-      }
 
-      if ( artist.is_null() )
-      {
-        // TODO: Error?
-      }
+        /////
+        // Find/create/update album.
 
-      /////
-      // Find/create/update album.
+        if ( !album_artist.is_null() ) {
+          album = album_artist.find_album_by_title(tag_album);
+        }
+        else {
+          album = artist.find_album_by_title(tag_album);
+        }
 
-
-      if ( !album_artist.is_null() ) {
-        album = album_artist.find_album_by_title(tag_album);
-      }
-      else {
-        album = artist.find_album_by_title(tag_album);
-      }
-
-      album.title(tag_album);
-
-      if ( !album_artist.is_null() )
-      {
-        album.member("artist", json::object{
-          { "id",   album_artist.id() },
-          { "name", album_artist.name() }
-        });
-      }
-      else
-      {
-        album.member("artist", json::object{
-          { "id",   artist.id() },
-          { "name", artist.name() }
-        });
-      }
-
-      if ( album.id_is_null() )
-      {
-        album.save();
+        album.title(tag_album);
 
         if ( !album_artist.is_null() )
         {
-          album_artist.add_album(album);
-          album_artist.save();
+          album.member("artist", json::object{
+            { "id",   album_artist.id() },
+            { "name", album_artist.name() }
+          });
         }
         else
         {
-          artist.add_album(album);
-          artist.save();
+          album.member("artist", json::object{
+            { "id",   artist.id() },
+            { "name", artist.name() }
+          });
+        }
+
+        if ( album.id_is_null() )
+        {
+          album.save();
+
+          if ( !album_artist.is_null() )
+          {
+            album_artist.add_album(album);
+            album_artist.save();
+          }
+          else
+          {
+            artist.add_album(album);
+            artist.save();
+          }
+        }
+        else
+        {
+          album.save();
+        }
+
+        /////
+        // Create/update track.
+
+        track = album.find_track_by_title_and_number(tag_title, tag_tn);
+
+        if ( alt_id.length() > 0 ) {
+          track.alt_id(alt_id);
         }
       }
-      else
-      {
-        album.save();
-      }
-
-      /////
-      // Create/update track.
-
-      auto track = album.find_track_by_title_and_number(tag_title, tag_tn);
 
       track.title(tag_title);
       track.track_number(tag_tn);

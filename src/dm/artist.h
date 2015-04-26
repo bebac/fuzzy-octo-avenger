@@ -30,6 +30,12 @@ namespace dm
     static void init(kvstore* store);
   public:
     artist();
+  public:
+    artist(const artist& other);
+    artist(artist&& other);
+  public:
+    artist& operator=(dm::artist& rhs);
+    artist& operator=(dm::artist&& rhs);
   private:
     artist(json::object&& data);
   public:

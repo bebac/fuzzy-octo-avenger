@@ -68,6 +68,14 @@ namespace dm
   {
   }
 
+  track::track(const track& other) : data_(other.data_)
+  {
+  }
+
+  track::track(track&& other) : data_(std::move(other.data_))
+  {
+  }
+
   track::track(json::object&& data)
   {
     data_ = std::move(data);
@@ -76,6 +84,12 @@ namespace dm
   track& track::operator= (const track& rhs)
   {
     data_ = rhs.data_;
+    return *this;
+  }
+
+  track& track::operator= (track&& rhs)
+  {
+    data_ = std::move(rhs.data_);
     return *this;
   }
 
@@ -332,7 +346,7 @@ namespace dm
       return true;
     });
 
-    return std::move(res);
+    return res;
   }
 
   track track::find_by_id(const std::string& id)
@@ -341,11 +355,11 @@ namespace dm
 
     if ( !data.is_null() )
     {
-      return std::move(track(std::move(data.as_object())));
+      return track(std::move(data.as_object()));
     }
     else
     {
-      return std::move(track());
+      return track();
     }
   }
 
@@ -357,7 +371,7 @@ namespace dm
       return find_by_id(id);
     }
     else {
-      return std::move(track());
+      return track();
     }
   }
 

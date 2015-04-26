@@ -40,6 +40,26 @@ namespace dm
     data_ = std::move(data);
   }
 
+  album_cover::album_cover(const album_cover& other) : data_(other.data_)
+  {
+  }
+
+  album_cover::album_cover(album_cover&& other) : data_(std::move(other.data_))
+  {
+  }
+
+  album_cover& album_cover::operator=(dm::album_cover& rhs)
+  {
+    data_ = rhs.data_;
+    return *this;
+  }
+
+  album_cover& album_cover::operator=(dm::album_cover&& rhs)
+  {
+    data_ = std::move(rhs.data_);
+    return *this;
+  }
+
   bool album_cover::is_null()
   {
     return data_.empty();
@@ -92,10 +112,10 @@ namespace dm
     auto data = kvstore_->get(key);
 
     if ( !data.is_null() ) {
-      return std::move(album_cover(key, std::move(data.as_object())));
+      return album_cover(key, std::move(data.as_object()));
     }
     else {
-      return std::move(album_cover(key, json::object{}));
+      return album_cover(key, json::object{});
     }
   }
 
@@ -107,6 +127,26 @@ namespace dm
 
   album::album()
   {
+  }
+
+  album::album(const album& other) : data_(other.data_)
+  {
+  }
+
+  album::album(album&& other) : data_(std::move(other.data_))
+  {
+  }
+
+  album& album::operator=(dm::album& rhs)
+  {
+    data_ = rhs.data_;
+    return *this;
+  }
+
+  album& album::operator=(dm::album&& rhs)
+  {
+    data_ = std::move(rhs.data_);
+    return *this;
   }
 
   album::album(json::object&& data)
@@ -148,7 +188,7 @@ namespace dm
         result.push_back(track.as_string());
       }
     }
-    return std::move(result);
+    return result;
   }
 
 #if 0
@@ -282,10 +322,10 @@ namespace dm
     auto data = kvstore_->get(id);
 
     if ( !data.is_null() ) {
-      return std::move(album(std::move(data.as_object())));
+      return album(std::move(data.as_object()));
     }
     else {
-      return std::move(album());
+      return album();
     }
   }
 

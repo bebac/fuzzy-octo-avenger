@@ -32,6 +32,12 @@ namespace dm
   private:
     album_cover(const std::string& key, json::object&& data);
   public:
+    album_cover(const album_cover& other);
+    album_cover(album_cover&& other);
+  public:
+    album_cover& operator=(dm::album_cover& rhs);
+    album_cover& operator=(dm::album_cover&& rhs);
+  public:
     bool is_null();
   public:
     // Setters.
@@ -60,6 +66,12 @@ namespace dm
     static void init(kvstore* store);
   public:
     album();
+  public:
+    album(const album& other);
+    album(album&& other);
+  public:
+    album& operator=(dm::album& rhs);
+    album& operator=(dm::album&& rhs);
   private:
     album(json::object&& data);
   public:

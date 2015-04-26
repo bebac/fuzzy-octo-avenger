@@ -26,6 +26,26 @@ namespace dm
   {
   }
 
+  artist::artist(const artist& other) : data_(other.data_)
+  {
+  }
+
+  artist::artist(artist&& other) : data_(std::move(other.data_))
+  {
+  }
+
+  artist& artist::operator=(dm::artist& rhs)
+  {
+    data_ = rhs.data_;
+    return *this;
+  }
+
+  artist& artist::operator=(dm::artist&& rhs)
+  {
+    data_ = std::move(rhs.data_);
+    return *this;
+  }
+
   artist::artist(json::object&& data)
   {
     data_ = std::move(data);
@@ -61,7 +81,7 @@ namespace dm
         }
       }
     }
-    return std::move(result);
+    return result;
   }
 
   void artist::name(const std::string& v)
@@ -170,11 +190,11 @@ namespace dm
 
     if ( !data.is_null() )
     {
-      return std::move(artist(std::move(data.as_object())));
+      return artist(std::move(data.as_object()));
     }
     else
     {
-      return std::move(artist());
+      return artist();
     }
   }
 
@@ -198,7 +218,7 @@ namespace dm
       }
     });
 
-    return std::move(result);
+    return result;
   }
 
   void artist::each(std::function<bool(json::value& value)> value_cb)

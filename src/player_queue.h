@@ -70,7 +70,7 @@ public:
 
     q_.pop_back();
 
-    return std::move(v);
+    return v;
   }
 public:
   const T& front()

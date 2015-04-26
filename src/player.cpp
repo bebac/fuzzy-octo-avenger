@@ -70,7 +70,7 @@ dm::track player_ctbp_selector::next()
 
   auto track = dm::track::find_by_id(track_ids_[dist(re_)]);
 
-  return std::move(track);
+  return track;
 }
 
 // ----------------------------------------------------------------------------
@@ -430,7 +430,7 @@ void player::play_from_queue()
     std::cerr << "play_from_queue id=" << track.id() << ", title='" << track.title() << "', source=" << src.name() << std::endl;
 
     state_.state  = playing;
-    state_.track  = track;
+    state_.track  = std::move(track);
     state_.source = src.name();
 
     std::cout << "player state=" << state_.state << std::endl;

@@ -44,10 +44,14 @@ namespace dm
     static void init(kvstore* store);
   public:
     track();
+  public:
+    track(const track& other);
+    track(track&& other);
   private:
     track(json::object&& data);
   public:
     track& operator= (const track& rhs);
+    track& operator= (track&& rhs);
   public:
     bool is_null();
     bool id_is_null();

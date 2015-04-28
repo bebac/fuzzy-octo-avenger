@@ -102,6 +102,15 @@ namespace jsonrpc
         size_t consumed = 0;
         do
         {
+          // Skip leftover zero terminator(s) and stop processing if we only
+          // got zeros.
+          while ( data[consumed] == '\0' )
+          {
+            if ( ++consumed >= len ) {
+              return;
+            }
+          }
+
           consumed += parser_.parse(data+consumed, len-consumed);
 
           if ( parser_.complete() )

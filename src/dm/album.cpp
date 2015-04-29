@@ -271,6 +271,27 @@ namespace dm
     }
   }
 
+  track album::find_track_by_disc_and_track_number(unsigned disc_number, unsigned track_number)
+  {
+    for ( auto& id : track_ids() )
+    {
+      auto track = dm::track::find_by_id(id);
+
+      if ( !track.is_null() )
+      {
+        if ( track.disc_number() == disc_number && track.track_number() == track_number ) {
+          return track;
+        }
+      }
+      else
+      {
+        // TODO: ERROR!
+        std::cerr << "invalid track! album id=" << this->id() << std::endl;
+      }
+    }
+    return track();
+  }
+
   track album::find_track_by_title_and_number(const std::string& title, unsigned track_number)
   {
     for ( auto& id : track_ids() )

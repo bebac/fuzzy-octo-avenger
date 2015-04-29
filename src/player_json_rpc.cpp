@@ -535,17 +535,40 @@ save_error:
       album.save();
     }
 
-    auto track_title = track_obj["title"].as_string();
+    auto track_title    = track_obj["title"].as_string();
+    auto track_tn       = track_obj["tn"].as_number();
+    auto track_dn       = track_obj["dn"].as_number();
+    auto track_duration = track_obj["duration"].as_number();
 
     /////
     // Update / create track.
 
-    auto track = album.find_track_by_title_and_number(track_title, track_obj["tn"].as_number());
+    auto track = album.find_track_by_disc_and_track_number(track_dn, track_tn);
 
-    track.title(track_title);
-    track.track_number(track_obj["tn"].as_number());
-    track.disc_number(track_obj["dn"].as_number());
-    track.duration(track_obj["duration"].as_number());
+    if ( track.id_is_null() )
+    {
+      //
+      // Only set the title for new tracks.
+      //
+      track.title(track_title);
+    }
+    else
+    {
+      //
+      // Found the track, but is it the right one? Not sure how to verify it. For
+      // now just log a warning if the titles don't match.
+      //
+      if ( track.title() != track_title )
+      {
+        std::cerr
+          << "title mismatch track id=" << track.id() << " '"
+          << track.title() << "' != '" << track_title << "'"  << std::endl;
+      }
+    }
+
+    track.track_number(track_tn);
+    track.disc_number(track_dn);
+    track.duration(track_duration);
     track.artist(track_artist);
     track.album(album);
     track.source(std::move(track_source_obj));

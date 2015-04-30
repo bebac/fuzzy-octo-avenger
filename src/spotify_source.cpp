@@ -16,7 +16,7 @@
 #include <memory>
 
 // ----------------------------------------------------------------------------
-#include <b64/encode.h>
+#include <base64.h>
 
 // ----------------------------------------------------------------------------
 class spotify_cover_loader : public std::enable_shared_from_this<spotify_cover_loader>
@@ -117,20 +117,9 @@ public:
 
     image_data = sp_image_data(image_, &size);
 
-    std::string image_data_s(reinterpret_cast<const char*>(image_data), size);
-
-    std::stringstream is;
-    std::stringstream os;
-
-    is.str(image_data_s);
-
-    base64::encoder b64;
-
-    b64.encode(is, os);
-
     json::object result{
       { "image_format", "jpg" },
-      { "image_data", os.str() }
+      { "image_data", base64::encode(static_cast<const char*>(image_data), size) }
     };
 
     promise_->set_value(result);

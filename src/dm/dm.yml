@@ -3,4 +3,5 @@
     sources:
         - ./*.cpp
     includes:
+        - ..
         - ../../lib/json/include

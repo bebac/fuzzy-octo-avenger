@@ -14,7 +14,7 @@
 #include "track.h"
 
 // ----------------------------------------------------------------------------
-#include <b64/encode.h>
+#include <base64.h>
 
 // ----------------------------------------------------------------------------
 namespace dm
@@ -77,18 +77,7 @@ namespace dm
 
   void album_cover::data(const char* v, size_t len)
   {
-    std::string image_data_s(v, len);
-
-    std::stringstream is;
-    std::stringstream os;
-
-    is.str(image_data_s);
-
-    base64::encoder b64;
-
-    b64.encode(is, os);
-
-    data_["image_data"] = os.str();
+    data_["image_data"] = base64::encode(v, len);
   }
 
   void album_cover::data(json::object&& data)

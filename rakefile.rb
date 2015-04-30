@@ -39,7 +39,7 @@ spec = Rake::ExecutableSpecification.new do |s|
     s.sources.add %w(
         src/*.cpp
     )
-    s.libraries += [ popt, dm, json ] + %w(asound FLAC++ tag spotify b64 kyotocabinet)
+    s.libraries += [ popt, dm, json ] + %w(asound FLAC++ tag spotify kyotocabinet)
 end
 
 # -----------------------------------------------------------------------------
@@ -60,6 +60,7 @@ spec = Rake::ExecutableSpecification.new do |s|
     )
     s.sources.add %w(
         src/local_source.cpp
+        src/base64.cpp
         test/**/*.cpp
 
     )

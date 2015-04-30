@@ -318,9 +318,11 @@ namespace dm
 
       if ( name.length() > 0 )
       {
-        for ( auto& source : sources ) {
-          if ( source.as_object()["name"].as_string() == name ) {
-            return track_source{source.as_object()};
+        for ( auto& source : sources )
+        {
+          auto& obj = source.as_object();
+          if ( !obj.empty() && obj["name"].as_string() == name ) {
+            return track_source{obj};
           }
         }
         return track_source();

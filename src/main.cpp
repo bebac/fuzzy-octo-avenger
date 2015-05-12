@@ -102,30 +102,30 @@ void run(const options& options)
   player.add_source("local", std::make_shared<local_source>());
 
   using std::placeholders::_1;
-  service.add_method("player/play",      std::bind(&json_rpc::play,                std::ref(player), _1));
-  service.add_method("player/queue",     std::bind(&json_rpc::queue,               std::ref(player), _1));
-  service.add_method("player/skip",      std::bind(&json_rpc::skip,                std::ref(player), _1));
-  service.add_method("player/stop",      std::bind(&json_rpc::stop,                std::ref(player), _1));
-  service.add_method("player/state",     std::bind(&json_rpc::state,               std::ref(player), _1));
-  service.add_method("player/ctpb",      std::bind(&json_rpc::continuous_playback, std::ref(player), _1));
+  service.add_method("player/play",          std::bind(&json_rpc::play,                std::ref(player), _1));
+  service.add_method("player/queue",         std::bind(&json_rpc::queue,               std::ref(player), _1));
+  service.add_method("player/skip",          std::bind(&json_rpc::skip,                std::ref(player), _1));
+  service.add_method("player/stop",          std::bind(&json_rpc::stop,                std::ref(player), _1));
+  service.add_method("player/state",         std::bind(&json_rpc::state,               std::ref(player), _1));
+  service.add_method("player/ctpb",          std::bind(&json_rpc::continuous_playback, std::ref(player), _1));
 #if 0
   service.add_method("db/tags",          std::bind(&json_rpc::tags,                std::ref(player), _1));
   service.add_method("db/export-tracks", std::bind(&json_rpc::export_tracks,       std::ref(player), _1));
 #endif
-  service.add_method("db/index",         std::bind(&json_rpc::index,         _1));
-  service.add_method("db/save",          std::bind(&json_rpc::save,          _1));
-  service.add_method("db/delete",        std::bind(&json_rpc::erase,         _1));
-  service.add_method("db/import-tracks", std::bind(&json_rpc::import_tracks, _1));
-  service.add_method("db/cover",         std::bind(&json_rpc::cover,         _1));
-
-  service.add_method("db/get/artists",      std::bind(&json_rpc::get_artists,        _1));
-  service.add_method("db/get/albums",       std::bind(&json_rpc::get_albums,         _1));
-  service.add_method("db/set/album",        std::bind(&json_rpc::set_album,          _1));
-  service.add_method("db/get/album/tracks", std::bind(&json_rpc::get_album_tracks,   _1));
-  service.add_method("db/get/tracks",       std::bind(&json_rpc::get_tracks,         _1));
-  service.add_method("db/get/source_local", std::bind(&json_rpc::get_source_local,   _1));
-  service.add_method("db/set/source_local", std::bind(&json_rpc::set_source_local,   _1));
-  service.add_method("sources/local/scan",  std::bind(&json_rpc::sources_local_scan, _1));
+  service.add_method("db/index",             std::bind(&json_rpc::index,                _1));
+  service.add_method("db/save",              std::bind(&json_rpc::save,                 _1));
+  service.add_method("db/delete",            std::bind(&json_rpc::erase,                _1));
+  service.add_method("db/import-tracks",     std::bind(&json_rpc::import_tracks,        _1));
+  service.add_method("db/cover",             std::bind(&json_rpc::cover,                _1));
+  service.add_method("db/get/artists",       std::bind(&json_rpc::get_artists,          _1));
+  service.add_method("db/get/albums",        std::bind(&json_rpc::get_albums,           _1));
+  service.add_method("db/set/album",         std::bind(&json_rpc::set_album,            _1));
+  service.add_method("db/get/album/tracks",  std::bind(&json_rpc::get_album_tracks,     _1));
+  service.add_method("db/get/tracks",        std::bind(&json_rpc::get_tracks,           _1));
+  service.add_method("db/get/source_local",  std::bind(&json_rpc::get_source_local,     _1));
+  service.add_method("db/set/source_local",  std::bind(&json_rpc::set_source_local,     _1));
+  service.add_method("sources/local/scan",   std::bind(&json_rpc::sources_local_scan,   _1));
+  service.add_method("sources/spotify/uris", std::bind(&json_rpc::sources_spotify_uris, _1));
 
   /////
   // Setup callback to get player state info. Note that the callback is

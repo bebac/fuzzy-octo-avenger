@@ -36,6 +36,7 @@ namespace json_rpc
   json_rpc_response get_source_local(const json_rpc_request& request);
   json_rpc_response set_source_local(const json_rpc_request& request);
   json_rpc_response sources_local_scan(const json_rpc_request& request);
+  json_rpc_response sources_spotify_uris(const json_rpc_request& request);
 #if 0
   json_rpc_response tags(player& player, const json_rpc_request& request);
   json_rpc_response export_tracks(player& player, const json_rpc_request& request);

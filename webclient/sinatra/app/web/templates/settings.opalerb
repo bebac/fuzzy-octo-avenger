@@ -11,4 +11,12 @@
       Local source settings.
     </td>
   </tr>
+  <tr>
+    <td>Spotify Source</td>
+    <td id="spotify">
+    </td>
+    <td>
+      Spotify source settings.
+    </td>
+  </tr>
 </table>

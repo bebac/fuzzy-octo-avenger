@@ -100,4 +100,28 @@ module MusicBox
 
   end
 
+  class Track < OpenStruct
+
+    def spotify_source
+      sources.each do |src|
+        if src["name"] == "spotify"
+          return src
+        end
+      end
+      nil
+    end
+
+  end
+
+  IP   = 'eeebox'.freeze
+  PORT = 8212.freeze
+
+  def self.conn
+    @conn ||= EventMachine::connect IP, PORT, MusicBox::Connection, IP, PORT
+  end
+
+  def self.call(method, params=nil, timeout=5, &blk)
+    MusicBox.conn.invoke(method, params, timeout, &blk)
+  end
+
 end

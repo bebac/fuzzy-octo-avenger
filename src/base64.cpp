@@ -23,6 +23,8 @@ namespace base64
   inline unsigned to6bit3(unsigned v) { return (v & 0x00000fc0) >>  6; }
   inline unsigned to6bit4(unsigned v) { return (v & 0x0000003f);       }
 
+  typedef unsigned char byte;
+
   char alphabet[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
                     "abcdefghijklmnopqrstuvwxyz"
                     "0123456789+/";
@@ -30,9 +32,11 @@ namespace base64
   char newline    = '\n';
   auto base       = sizeof(alphabet)-1;
 
-  std::string encode(const char* buf, size_t len)
+  std::string encode(const void* data, size_t len)
   {
     std::string result;
+
+    const byte* buf = static_cast<const byte*>(data);
 
     result.reserve((len / 3 + (len % 3 > 0)) * 4);
 
@@ -82,7 +86,7 @@ namespace base64
     return result;
   }
 
-  std::string decode(const char* buf, size_t len)
+  std::string decode(const void* data, size_t len)
   {
 #if 0
     if ( len % 4 ) {
@@ -92,6 +96,8 @@ namespace base64
 
     std::string result;
     size_t      padding = 0;
+
+    const byte* buf = static_cast<const byte*>(data);
 
     if ( len > 0 && buf[len-1] == newline )
       len--;

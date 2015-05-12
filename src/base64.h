@@ -18,8 +18,8 @@
 // ----------------------------------------------------------------------------
 namespace base64
 {
-  std::string encode(const char* buf, size_t len);
-  std::string decode(const char* buf, size_t len);
+  std::string encode(const void* data, size_t len);
+  std::string decode(const void* data, size_t len);
 }
 
 #endif // __base64_h__

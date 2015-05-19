@@ -20,6 +20,7 @@ ENV["CPPFLAGS"] = %q(-std=c++11)
 # -----------------------------------------------------------------------------
 popt = Rake::StaticLibraryTask.new("lib/program-options/program-options.yml")
 json = Rake::StaticLibraryTask.new("lib/json/json.yml")
+dc   = Rake::StaticLibraryTask.new("lib/dripcore/dripcore.yml")
 dm   = Rake::StaticLibraryTask.new("src/dm/dm.yml")
 
 # -----------------------------------------------------------------------------
@@ -39,7 +40,7 @@ spec = Rake::ExecutableSpecification.new do |s|
     s.sources.add %w(
         src/*.cpp
     )
-    s.libraries += [ popt, dm, json ] + %w(asound FLAC++ tag spotify kyotocabinet)
+    s.libraries += [ popt, dm, dc, json ] + %w(asound FLAC++ tag spotify kyotocabinet)
 end
 
 # -----------------------------------------------------------------------------
@@ -64,7 +65,7 @@ spec = Rake::ExecutableSpecification.new do |s|
         test/**/*.cpp
 
     )
-    s.libraries += [ dm, json ] + %w(asound FLAC++ tag b64 kyotocabinet)
+    s.libraries += [ dm, dc, json ] + %w(asound FLAC++ tag b64 kyotocabinet)
 end
 
 # -----------------------------------------------------------------------------

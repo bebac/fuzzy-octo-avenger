@@ -1,0 +1,6 @@
+--- !library
+    name: dripcore
+    sources:
+        - source/**/*.cpp
+    includes:
+        - include

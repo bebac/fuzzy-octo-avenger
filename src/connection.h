@@ -13,35 +13,33 @@
 #define __connection_h__
 
 // ----------------------------------------------------------------------------
-#include <dripcore.h>
-#include <basic_socket.h>
+#include <dripcore/loop.h>
+#include <dripcore/eventable.h>
+#include <dripcore/socket.h>
+#include <dripcore/context.h>
+#include <dripcore/connection.h>
 #include <json/json.h>
 #include <json_rpc.h>
 
 // ----------------------------------------------------------------------------
 #include <iostream>
-#include <sstream>
-#include <cstring>
 
 // ----------------------------------------------------------------------------
 namespace jsonrpc
 {
   namespace server
   {
-    class connection : public dripcore::eventable
+    class connection : public dripcore::connection
     {
     public:
-      connection(jsonrpc::service& service, basic_socket socket)
+      connection(jsonrpc::service& service, dripcore::socket socket)
         :
-        eventable(),
+        dripcore::connection(std::move(socket)),
         service_(service),
-        socket_(std::move(socket)),
         value_(),
         parser_(value_)
       {
         std::cout << "connection " << this << std::endl;
-        set_rd_handler(std::bind(&connection::read, this));
-        set_wr_handler(std::bind(&connection::write, this));
       }
     protected:
       virtual void started(dripcore::loop* loop)
@@ -58,46 +56,19 @@ namespace jsonrpc
     public:
       ~connection()
       {
-        socket_.close();
         std::cout << "~connection " << this << std::endl;
       }
     public:
       void send_notification(json_rpc_notification notification)
       {
-        obuf_.append(to_string(notification));
-        obuf_.append(1, '\0');
-        write();
+        dripcore::context::lock_guard lock(get_context());
+
+        auto buf = to_string(notification).append(1, '\0');
+
+        send(buf.data(), buf.length());
       }
     protected:
-      void read()
-      {
-        std::array<char, 1024> buf;
-
-        //std::cout << "read_handler" << std::endl;
-
-        ssize_t res;
-        do
-        {
-          res = socket_.recv(buf.data(), buf.size(), 0);
-
-          if ( res > 0 )
-          {
-            process_data(buf.data(), res);
-          }
-          else if ( res < 0 )
-          {
-            // TODO: Handle error.
-            std::cerr << "connection read error " << strerror(errno) << std::endl;
-          }
-          else
-          {
-            stop();
-          }
-        }
-        while ( res != 0 && res == buf.size() );
-      }
-    protected:
-      void process_data(const char* data, size_t len)
+      void receive_data(const char* data, size_t len)
       {
         size_t consumed = 0;
         do
@@ -134,58 +105,40 @@ namespace jsonrpc
 
         //std::cerr << "method=" << req.method() << ", params=" << req.params() << std::endl;
 
-        service_.execute_async(request, [this](json_rpc_response response) {
-            obuf_.append(to_string(response));
-            obuf_.append(1, '\0');
-            write();
-          });
+        auto response = service_.execute(request);
+        auto buf = to_string(response).append(1, '\0');
+
+        send(buf.data(), buf.length());
       }
-    protected:
-      void write()
+    private:
+      size_t obuf_len()
       {
-        //std::cout << "write obuf_ len=" << obuf_.length() << ", capacity=" << obuf_.capacity() << std::endl;
-
-        if ( obuf_.length() == 0 )
-          return;
-
-        ssize_t sent = socket_.send(obuf_.data(), obuf_.length(), 0);
-
-        //std::cerr << "sent=" << sent << std::endl;
-
-        if ( sent >= 0 )
-        {
-          /////
-          // NOTE
-          // I assume erase(0, obuf_.length()) is as efficient as clear. If not
-          // maybe it's better to check if sent == obuf_.length and call clear.
-
-          obuf_.erase(0, sent);
-          obuf_.reserve(1024);
-        }
-        else if ( errno == EWOULDBLOCK || errno == EAGAIN )
-        {
-          std::cerr << "connection write error " << strerror(errno) << std::endl;
-        }
-        else
-        {
-          std::cerr << "connection write error " << strerror(errno) << std::endl;
-          stop();
-        }
+        return obuf_.length();
       }
-    public:
-      int get_os_handle() const
+    private:
+      const char* obuf_ptr()
       {
-        return socket_.get_os_handle();
+        return obuf_.data();
+      }
+    private:
+      void obuf_write(const char* buf, size_t len)
+      {
+        obuf_.append(buf, len);
+        std::cerr << "connection obuf_write len=" << len << std::endl;
+      }
+    private:
+      void obuf_sent(size_t len)
+      {
+        obuf_.erase(0, len);
       }
     private:
       jsonrpc::service& service_;
     private:
-      basic_socket socket_;
-      json::value  value_;
-      json::parser parser_;
-      std::string  obuf_;
+      json::value       value_;
+      json::parser      parser_;
+      std::string       obuf_;
     };
   } // namespace server
 } // namespace jsonrpc
 
-#endif // __acceptor_h__
+#endif // __connection_h__

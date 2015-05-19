@@ -18,58 +18,38 @@
 // ----------------------------------------------------------------------------
 namespace jsonrpc
 {
-  service::service(dripcore::loop& loop)
-    :
-    res_q_(new response_queue),
-    running_(true)
+  service::service()
   {
-    // Start response queue.
-    loop.start(res_q_);
-    // Start worker threads.
-    workers_.emplace_back(std::thread{&service::work_loop, this});
-    workers_.emplace_back(std::thread{&service::work_loop, this});
   }
 
   service::~service()
   {
-    running_ = false;
-
-    // Wake up the workers.
-    for ( size_t i=0; i<workers_.size(); i++ ) {
-      req_q_.push([]{});
-    }
-
-    // Wait for workers to end.
-    for ( auto& thr : workers_ ) {
-      thr.join();
-    }
   }
 
-  void service::execute_async(const json_rpc_request& request, std::function<void(json_rpc_response)> completed)
+  json_rpc_response service::execute(const json_rpc_request& request)
   {
     auto it = methods_.find(request.method());
 
     if ( it != end(methods_) )
     {
-      req_q_.push([=] {
-        res_q_->push(std::bind(std::move(completed), (*it).second(std::move(request))));
-      });
+      return (*it).second(request);
     }
     else
     {
       json_rpc_response response{request};
       response.method_not_found();
-      completed(response);
+      return response;
     }
   }
 
   void service::send_notification(json_rpc_notification notification)
   {
-    for ( auto& conn : connections_ )
+    for ( auto& ptr : connections_ )
     {
-      if ( !conn.expired() )
-      {
-        res_q_->push(std::bind(&server::connection::send_notification, conn.lock(), notification));
+      auto connection = ptr.lock();
+
+      if ( connection.get() ) {
+        connection->send_notification(notification);
       }
     }
   }
@@ -82,14 +62,5 @@ namespace jsonrpc
   void service::detach_connection(std::shared_ptr<server::connection> connection)
   {
     connections_.erase(connection);
-  }
-
-  void service::work_loop()
-  {
-    while ( running_ )
-    {
-      auto cmd = req_q_.pop();
-      cmd();
-    }
   }
 }

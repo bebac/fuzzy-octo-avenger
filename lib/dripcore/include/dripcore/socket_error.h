@@ -3,7 +3,7 @@
 //     Filename   : socket_error.h
 //
 //     Author     : Benny Bach <benny.bach@gmail.com>
-//                  Copyright (C) 2014
+//                  Copyright (C) 2015
 //
 // --- Description: -----------------------------------------------------------
 //

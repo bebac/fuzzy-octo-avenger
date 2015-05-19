@@ -13,7 +13,8 @@
 #define __json_rpc_h__
 
 // ----------------------------------------------------------------------------
-#include <dripcore.h>
+#include <dripcore/loop.h>
+#include <dripcore/eventable.h>
 #include <json/json.h>
 
 // ----------------------------------------------------------------------------
@@ -103,7 +104,6 @@ class json_rpc_response
   friend std::string to_string(const json_rpc_response& response);
 public:
   json_rpc_response(const json_rpc_request& request)
-  //json_rpc_response(json_rpc_request& request)
     :
     object_{ { "jsonrpc", "2.0" }, { "id", request.id() } }
   {
@@ -168,109 +168,6 @@ inline std::string to_string(const json_rpc_notification& notification)
 // ----------------------------------------------------------------------------
 namespace jsonrpc
 {
-  class request_queue
-  {
-  public:
-    request_queue()
-    {
-    };
-  private:
-    request_queue(const request_queue& other) = delete;
-  public:
-    virtual ~request_queue()
-    {
-    };
-  public:
-    void push(std::function<void()>&& command)
-    {
-      std::lock_guard<std::mutex> _(lock);
-      q.push(std::move(command));
-      rdy.notify_one();
-    }
-  public:
-    std::function<void()> pop()
-    {
-      std::unique_lock<std::mutex> _(lock);
-
-      if ( q.empty() ) {
-        rdy.wait(_);
-      }
-
-      if ( q.empty() ) {
-        return []{};
-      }
-      else
-      {
-        std::function<void()> c = std::move(q.front());
-        q.pop();
-        return std::move(c);
-      }
-    }
-  private:
-    std::mutex lock;
-    std::condition_variable rdy;
-    std::queue<std::function<void()>> q;
-  };
-
-  class response_queue : public dripcore::eventable
-  {
-  public:
-    response_queue()
-    {
-      if ( (fd_ = eventfd(0, 0)) == -1 ) {
-        throw std::system_error(errno, std::system_category());
-      }
-      set_rd_handler(std::bind(&response_queue::read_handler, this));
-    }
-  public:
-    void push(std::function<void()>&& command)
-    {
-      std::lock_guard<std::mutex> _(lock_);
-      q_.push(std::move(command));
-      notify_one();
-    }
-  public:
-    void read_handler()
-    {
-      uint64_t v;
-
-      ssize_t res = read(fd_, &v, sizeof(uint64_t));
-
-      if ( res == sizeof(uint64_t) )
-      {
-        std::lock_guard<std::mutex> _(lock_);
-
-        while ( v-- > 0 )
-        {
-          q_.front()();
-          q_.pop();
-        }
-      }
-      else
-      {
-        throw std::system_error(errno, std::system_category());
-      }
-    }
-  public:
-    int get_os_handle() const
-    {
-      return fd_;
-    }
-  private:
-    void notify_one()
-    {
-      uint64_t v = 1;
-      if ( write(fd_, &v, sizeof(uint64_t)) < 0 )
-      {
-        throw std::system_error(errno, std::system_category());
-      }
-    }
-  private:
-    std::mutex lock_;
-    int fd_;
-    std::queue<std::function<void()>> q_;
-  };
-
   namespace server
   {
     class connection;
@@ -279,10 +176,8 @@ namespace jsonrpc
   class service
   {
     using method_func = std::function<json_rpc_response(const json_rpc_request& request)>;
-    //using method_func = std::function<json_rpc_response(json_rpc_request& request)>;
-    //using notify_func = std::function<void(json_rpc_notification)>;
   public:
-    service(dripcore::loop& loop);
+    service();
   public:
     ~service();
   public:
@@ -291,24 +186,17 @@ namespace jsonrpc
       methods_.emplace(std::move(name), std::move(method));
     }
   public:
-    void execute_async(const json_rpc_request& request, std::function<void(json_rpc_response)> completed);
+    json_rpc_response execute(const json_rpc_request& request);
   public:
     void send_notification(json_rpc_notification notification);
   public:
     void attach_connection(std::shared_ptr<server::connection> connection);
     void detach_connection(std::shared_ptr<server::connection> connection);
   private:
-    void work_loop();
-  private:
     using method_map_t = std::map<std::string, method_func>;
-    using response_queue_ptr = std::shared_ptr<response_queue>;
     using connection_ptr = std::weak_ptr<server::connection>;
     using connection_container = std::set<connection_ptr, std::owner_less<connection_ptr>>;
   private:
-    request_queue            req_q_;
-    response_queue_ptr       res_q_;
-    std::vector<std::thread> workers_;
-    std::atomic<bool>        running_;
     method_map_t             methods_;
     connection_container     connections_;
   };

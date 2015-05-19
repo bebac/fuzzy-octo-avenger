@@ -10,7 +10,7 @@
 //
 // ----------------------------------------------------------------------------
 #include <program_options.h>
-#include <acceptor.h>
+#include <dripcore/acceptor.h>
 #include <connection.h>
 #include <player.h>
 #include <player_json_rpc.h>
@@ -78,7 +78,7 @@ void run(const options& options)
 
   loop_.reset(new dripcore::loop);
 
-  jsonrpc::service service(*loop_);
+  jsonrpc::service service;
   player           player(options.audio_device);
 
   if ( signal(SIGPIPE, sig_handler) == SIG_ERR ) {
@@ -145,7 +145,8 @@ void run(const options& options)
     service.send_notification(json_rpc_notification("player/event", params));
   });
 
-  auto acceptor = std::make_shared<jsonrpc::server::acceptor>([&](basic_socket client) {
+  auto acceptor = std::make_shared<dripcore::acceptor>("0.0.0.0", 8212,
+    [&](dripcore::socket client) {
       loop_->start(std::make_shared<jsonrpc::server::connection>(service, std::move(client)));
     });
 

@@ -85,7 +85,7 @@ namespace json
   public:
     size_t parse(const char* begin, const char* end);
   public:
-    virtual json::value value() { return std::move(json::value(std::move(value_))); }
+    virtual json::value value() { return json::value(std::move(value_)); }
   private:
     std::string value_;
   };
@@ -97,7 +97,7 @@ namespace json
   public:
     size_t parse(const char* begin, const char* end);
   public:
-    virtual json::value value() { return std::move(json::value(std::stod(value_))); }
+    virtual json::value value() { return json::value(std::stod(value_)); }
   private:
     std::string value_;
   };

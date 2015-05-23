@@ -40,9 +40,9 @@ namespace json
   public:
     virtual ~array() {}
   public:
-    size_t size() { return value_.size(); }
+    size_t size() const { return value_.size(); }
   public:
-    bool empty() { return value_.empty(); }
+    bool empty() const { return value_.empty(); }
   public:
     template <typename V> void push_back(V v)
     {

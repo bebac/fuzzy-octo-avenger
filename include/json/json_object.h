@@ -55,9 +55,7 @@ namespace json
   public:
     virtual ~object() {}
   public:
-    bool empty() { return value_.empty(); }
-  public:
-    virtual bool is_object() const { return true; }
+    bool empty() const { return value_.empty(); }
   public:
     bool has_member(std::string key) const
     {

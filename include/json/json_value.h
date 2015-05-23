@@ -23,10 +23,10 @@ namespace json
 {
   enum class type
   {
-    nul = 0x01,
-    num = 0x02,
-    tru = 0x03,
-    fal = 0x04,
+    nul = 0x00,
+    num = 0x01,
+    tru = 0x02,
+    fal = 0x03,
     str = 0x81,
     obj = 0x82,
     arr = 0x83
@@ -145,7 +145,7 @@ namespace json
       }
       result += "\"";
 
-      return std::move(result);
+      return result;
   }
 }
 

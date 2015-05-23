@@ -38,14 +38,17 @@ namespace dripcore
   {
     std::array<char, 1024> buf;
 
-    ssize_t res;
+    auto ptr = buf.data();
+    auto len = buf.size();
+    auto res = ssize_t{0};
+
     do
     {
-      res = socket_.recv(buf.data(), buf.size(), 0);
+      res = socket_.recv(ptr, len, 0);
 
       if ( res > 0 )
       {
-        receive_data(buf.data(), res);
+        receive_data(ptr, res);
       }
       else if ( res < 0 )
       {
@@ -59,7 +62,7 @@ namespace dripcore
         stop();
       }
     }
-    while ( res != 0 && res == buf.size() );
+    while ( res != 0 && res == static_cast<ssize_t>(len) );
   }
 
   void connection::send(const char* buf, size_t len)

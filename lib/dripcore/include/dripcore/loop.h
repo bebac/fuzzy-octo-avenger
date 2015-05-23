@@ -38,7 +38,7 @@ namespace dripcore
     void run();
     void shutdown();
   public:
-    eventable_container eventables();
+    eventable_container eventables() const;
   public:
     void start(const std::shared_ptr<eventable>& eventable);
     void stop(const std::shared_ptr<eventable>& eventable);
@@ -50,8 +50,8 @@ namespace dripcore
   private:
     eventable_container eventables_;
   private:
-    std::atomic<bool> running_;
-    std::mutex        mutex_;
+    std::atomic<bool>  running_;
+    mutable std::mutex mutex_;
   private:
     std::vector<std::thread> workers_;
   };

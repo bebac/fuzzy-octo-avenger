@@ -56,7 +56,7 @@ namespace dripcore
     stop_all_eventables();
   }
 
-  loop::eventable_container loop::eventables()
+  loop::eventable_container loop::eventables() const
   {
     lock_guard lock(mutex_);
     return eventables_;

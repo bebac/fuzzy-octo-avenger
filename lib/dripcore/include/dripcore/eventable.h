@@ -40,8 +40,8 @@ namespace dripcore
   public:
     virtual context& get_context() = 0;
   public:
-    bool has_rd_handler() { return rd_handler_ ? true : false; }
-    bool has_wr_handler() { return wr_handler_ ? true : false; }
+    bool has_rd_handler() const noexcept { return rd_handler_ ? true : false; }
+    bool has_wr_handler() const noexcept { return wr_handler_ ? true : false; }
   public:
     void set_rd_handler(callback callback) { rd_handler_ = callback; }
     void set_wr_handler(callback callback) { wr_handler_ = callback; }

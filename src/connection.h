@@ -44,14 +44,14 @@ namespace jsonrpc
     protected:
       virtual void started(dripcore::loop* loop)
       {
-        dripcore::eventable::started(loop);
+        dripcore::connection::started(loop);
         service_.attach_connection(std::dynamic_pointer_cast<connection>(ptr()));
       }
     protected:
       virtual void stopped(dripcore::loop* loop)
       {
         service_.detach_connection(std::dynamic_pointer_cast<connection>(ptr()));
-        dripcore::eventable::stopped(loop);
+        dripcore::connection::stopped(loop);
       }
     public:
       ~connection()
@@ -133,7 +133,6 @@ namespace jsonrpc
       }
     private:
       jsonrpc::service& service_;
-    private:
       json::value       value_;
       json::parser      parser_;
       std::string       obuf_;

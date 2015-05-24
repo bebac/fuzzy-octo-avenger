@@ -29,12 +29,6 @@ public:
     socket_error(int ec) : std::system_error(ec, std::system_category()) {}
 public:
     virtual ~socket_error() noexcept {}
-public:
-    //bool success() { return code().value() == false; }
-    //virtual const char* what() const noexcept;
-private:
-    //mutable std::string m_msg;
-    //int                 m_errno;
 };
 
 // ----------------------------------------------------------------------------

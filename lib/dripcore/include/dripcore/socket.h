@@ -52,9 +52,7 @@ namespace dripcore
   public:
     socket& operator= (socket&& rhs)
     {
-      // Move values from right hand side.
-      fd_    = rhs.fd_;
-      // Invalidate right hand side fd.
+      fd_ = rhs.fd_;
       rhs.fd_ = -1;
       return *this;
     }

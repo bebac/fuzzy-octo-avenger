@@ -36,7 +36,7 @@ namespace dripcore
   {
     auto eventable = eventable_ptr_.lock();
 
-    if ( eventable.get() )
+    if ( eventable )
     {
       // TODO: Locking the context is not optimal. Need another way
       //       to schedule events.

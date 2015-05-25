@@ -42,6 +42,7 @@ namespace dripcore
 
   void eventable::stopped(loop* loop)
   {
+    loop_ = nullptr;
   }
 
   dripcore::loop& eventable::get_loop()

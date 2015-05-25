@@ -18,6 +18,7 @@
 #include <dripcore/socket.h>
 #include <dripcore/context.h>
 #include <dripcore/connection.h>
+#include <dripcore/queue.h>
 #include <json/json.h>
 #include <json_rpc.h>
 
@@ -37,7 +38,8 @@ namespace jsonrpc
         dripcore::connection(std::move(socket)),
         service_(service),
         value_(),
-        parser_(value_)
+        parser_(value_),
+        queue_(std::make_shared<dripcore::queue>(context_))
       {
         std::cout << "connection " << this << std::endl;
       }
@@ -45,12 +47,14 @@ namespace jsonrpc
       virtual void started(dripcore::loop* loop)
       {
         dripcore::connection::started(loop);
+        get_loop().start(queue_);
         service_.attach_connection(std::dynamic_pointer_cast<connection>(ptr()));
       }
     protected:
       virtual void stopped(dripcore::loop* loop)
       {
         service_.detach_connection(std::dynamic_pointer_cast<connection>(ptr()));
+        get_loop().stop(queue_);
         dripcore::connection::stopped(loop);
       }
     public:
@@ -59,13 +63,13 @@ namespace jsonrpc
         std::cout << "~connection " << this << std::endl;
       }
     public:
-      void send_notification(json_rpc_notification notification)
+      void send_notification(const json_rpc_notification& notification)
       {
-        dripcore::context::lock_guard lock(get_context());
-
-        auto buf = to_string(notification).append(1, '\0');
-
-        send(buf.data(), buf.length());
+        queue_->push([=]()
+        {
+          auto buf = to_string(notification).append(1, '\0');
+          send(buf.data(), buf.length());
+        });
       }
     protected:
       void receive_data(const char* data, size_t len)
@@ -136,6 +140,8 @@ namespace jsonrpc
       json::value       value_;
       json::parser      parser_;
       std::string       obuf_;
+    private:
+      std::shared_ptr<dripcore::queue> queue_;
     };
   } // namespace server
 } // namespace jsonrpc

@@ -31,7 +31,7 @@ namespace dripcore
   class loop
   {
     using eventable_container = std::set<std::shared_ptr<eventable>>;
-    using lock_guard = std::lock_guard<std::mutex>;
+    using lock_guard = std::lock_guard<std::recursive_mutex>;
   public:
     loop();
   public:
@@ -51,7 +51,7 @@ namespace dripcore
     eventable_container eventables_;
   private:
     std::atomic<bool>  running_;
-    mutable std::mutex mutex_;
+    mutable std::recursive_mutex mutex_;
   private:
     std::vector<std::thread> workers_;
   };

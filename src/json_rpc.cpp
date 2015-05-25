@@ -48,7 +48,8 @@ namespace jsonrpc
     {
       auto connection = ptr.lock();
 
-      if ( connection.get() ) {
+      if ( connection )
+      {
         connection->send_notification(notification);
       }
     }

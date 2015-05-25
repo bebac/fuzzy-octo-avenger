@@ -48,7 +48,7 @@ namespace dripcore
     {
       return context_;
     }
-  private:
+  protected:
     dripcore::context context_;
     dripcore::socket  socket_;
   };

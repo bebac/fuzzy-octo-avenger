@@ -90,11 +90,8 @@ namespace dripcore
 
   void loop::stop(const std::shared_ptr<eventable>& eventable)
   {
-#if 0
-    std::stringstream ss;
-    ss << "loop::stop ptr=" << int64_t(eventable.get()) << ", fd=" << eventable->get_os_handle() << std::endl;
-    std::cerr << ss.str();
-#endif
+    if ( !eventable->loop_ )
+      return;
 
     if ( epoll_ctl(os_handle_, EPOLL_CTL_DEL, eventable->get_os_handle(), nullptr) == -1 ) {
       throw std::system_error(errno, std::system_category());

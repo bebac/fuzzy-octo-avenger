@@ -40,6 +40,7 @@ namespace dripcore
     {
       // TODO: Locking the context is not optimal. Need another way
       //       to schedule events.
+
       context::lock_guard lock(eventable->get_context());
 
       if ( (events & EPOLLIN) == EPOLLIN ) {

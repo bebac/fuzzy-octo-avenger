@@ -3,7 +3,7 @@
 
 // ----------------------------------------------------------------------------
 #include <dripcore/loop.h>
-#include <acceptor.h>
+#include <dripcore/acceptor.h>
 
 // ----------------------------------------------------------------------------
 #include <thread>
@@ -57,7 +57,7 @@ TEST_CASE("should shot down when there is noo more eventables")
 {
   std::atomic<bool> stopped;
 
-  auto acceptor = std::make_shared<jsonrpc::server::acceptor>([&](basic_socket client) {});
+  auto acceptor = std::make_shared<dripcore::acceptor>("127.0.0.1", 8212, [&](dripcore::socket client) {});
 
   std::thread dripcore(run_dripcore_with_eventable, acceptor, std::ref(stopped));
 
@@ -80,7 +80,7 @@ TEST_CASE("should shot down on request")
 
   dripcore::loop loop;
 
-  auto acceptor = std::make_shared<jsonrpc::server::acceptor>([&](basic_socket client) {});
+  auto acceptor = std::make_shared<dripcore::acceptor>("127.0.0.1", 8212, [&](dripcore::socket client) {});
 
   loop.start(acceptor);
 

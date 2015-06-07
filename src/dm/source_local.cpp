@@ -14,6 +14,7 @@
 #include "source_local.h"
 
 #include "../local_source.h"
+#include "../file_system.h"
 
 #include <taglib/fileref.h>
 #include <taglib/flacfile.h>
@@ -99,7 +100,9 @@ namespace dm
 
     for ( auto& dirname : directories() )
     {
-      file_system::scan_dir(dirname, [&](const std::string& filename)
+      auto dir = file_system::directory{dirname};
+
+      dir.each_file([&](const std::string& filename)
       {
         if ( file_system::extension(filename) == "flac" )
         {

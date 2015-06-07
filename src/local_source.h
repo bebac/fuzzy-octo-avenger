@@ -17,33 +17,6 @@
 #include "source_base.h"
 
 // ----------------------------------------------------------------------------
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <dirent.h>
-
-// ----------------------------------------------------------------------------
-namespace file_system
-{
-  enum type
-  {
-    block_device,
-    char_device,
-    directory,
-    fifo,
-    symlink,
-    file,
-    socket,
-    unknown
-  };
-
-  file_system::type file_type(const std::string& pathname);
-
-  void scan_dir(const std::string& dirname, std::function<void(const std::string& filename)> callback);
-
-  std::string extension(const std::string& filename);
-}
-
-// ----------------------------------------------------------------------------
 class local_source : public source_base
 {
   using audio_output_ptr = std::weak_ptr<audio_output_t>;

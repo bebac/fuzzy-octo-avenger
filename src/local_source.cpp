@@ -11,6 +11,7 @@
 // ----------------------------------------------------------------------------
 
 #include "local_source.h"
+#include "file_system.h"
 #include "dm/dm.h"
 
 // ----------------------------------------------------------------------------
@@ -138,76 +139,6 @@ private:
   unsigned         bits_per_sample_;
   audio_output_ptr audio_output_;
 };
-
-// ----------------------------------------------------------------------------
-namespace file_system
-{
-  file_system::type file_type(const std::string& pathname)
-  {
-    struct stat st;
-
-    stat(pathname.c_str(), &st);
-
-    switch (st.st_mode & S_IFMT)
-    {
-    case S_IFBLK:  return block_device;
-    case S_IFCHR:  return char_device;
-    case S_IFDIR:  return directory;
-    case S_IFIFO:  return fifo;
-    case S_IFLNK:  return symlink;
-    case S_IFREG:  return file;
-    case S_IFSOCK: return socket;
-    default:       return unknown;
-    }
-  }
-
-  void scan_dir(const std::string& dirname, std::function<void(const std::string& filename)> callback)
-  {
-    DIR *dir;
-    struct dirent *dp;
-
-    if ((dir = opendir(dirname.c_str())) == NULL)
-    {
-        perror ("Cannot open .");
-        exit (1);
-    }
-
-    while ((dp = readdir(dir)) != NULL)
-    {
-      auto entry = std::string(dp->d_name);
-
-      if ( ! (entry == "." || entry == "..") )
-      {
-        auto path = dirname+"/"+entry;
-        auto type = file_type(path);
-
-        if ( type == directory ) {
-          scan_dir(path, callback);
-        }
-        else if ( type == file ) {
-          callback(path);
-        }
-        else {
-          // Ignore.
-        }
-      }
-    }
-
-    closedir(dir);
-  }
-
-  std::string extension(const std::string& filename)
-  {
-    size_t pos = filename.rfind('.');
-
-    if ( pos != std::string::npos ) {
-      return filename.substr(pos+1, std::string::npos);
-    }
-    else {
-      return std::string();
-    }
-  }
-}
 
 // ----------------------------------------------------------------------------
 void local_source::play(const std::string& uri, audio_output_ptr audio_output)

@@ -19,7 +19,6 @@
 #include <taglib/flacfile.h>
 #include <taglib/xiphcomment.h>
 #include <FLAC++/decoder.h>
-#include <b64/encode.h>
 
 // ----------------------------------------------------------------------------
 #include <iostream>

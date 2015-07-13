@@ -1,9 +1,9 @@
 GIT
   remote: https://github.com/bebac/rspotify.git
-  revision: 6c3fd3acc4a1bc3790b26b01d5d42dbe356ca77d
-  tag: v1.13.0
+  revision: 56a16924f556a16bb0c4b327641035be1c8064dd
+  ref: 56a16924f556a16bb0c4b327641035be1c8064dd
   specs:
-    rspotify (1.13.0)
+    rspotify (1.14.0)
       omniauth-oauth2 (~> 1.1)
       rest-client (~> 1.7)
 
@@ -16,13 +16,13 @@ GEM
     eventmachine (1.0.7)
     faraday (0.9.1)
       multipart-post (>= 1.2, < 3)
-    hashie (3.4.1)
+    hashie (3.4.2)
     hike (1.2.3)
     http-cookie (1.0.2)
       domain_name (~> 0.5)
     json (1.8.2)
-    jwt (1.4.1)
-    mime-types (2.5)
+    jwt (1.5.1)
+    mime-types (2.6.1)
     multi_json (1.10.1)
     multi_xml (0.5.5)
     multipart-post (2.0.0)
@@ -36,7 +36,7 @@ GEM
     omniauth (1.2.2)
       hashie (>= 1.2, < 4)
       rack (~> 1.0)
-    omniauth-oauth2 (1.3.0)
+    omniauth-oauth2 (1.3.1)
       oauth2 (~> 1.0)
       omniauth (~> 1.2)
     opal (0.6.3)
@@ -50,7 +50,7 @@ GEM
       opal (>= 0.5.0, < 1.0.0)
       opal-activesupport
       opal-jquery
-    rack (1.6.0)
+    rack (1.6.4)
     rack-protection (1.5.3)
       rack
     rest-client (1.8.0)
@@ -58,10 +58,10 @@ GEM
       mime-types (>= 1.16, < 3.0)
       netrc (~> 0.7)
     sass (3.2.19)
-    sinatra (1.4.5)
+    sinatra (1.4.6)
       rack (~> 1.4)
       rack-protection (~> 1.4)
-      tilt (~> 1.3, >= 1.3.4)
+      tilt (>= 1.3, < 3)
     source_map (3.0.1)
       json
     sprockets (2.12.3)

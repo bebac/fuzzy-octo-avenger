@@ -113,7 +113,7 @@ module MusicBox
 
   end
 
-  IP   = 'eeebox'.freeze
+  IP   = '127.0.0.1'.freeze
   PORT = 8212.freeze
 
   def self.conn

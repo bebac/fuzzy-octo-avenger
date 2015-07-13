@@ -2,7 +2,7 @@ require 'open-uri'
 
 require_relative 'music_box'
 
-module Spotify
+module SpotifyImporter
 
   class SavedTracksImporter
 

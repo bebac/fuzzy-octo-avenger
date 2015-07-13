@@ -1,4 +1,7 @@
 require 'sinatra'
+require 'omniauth'
+require 'rspotify'
+require 'rspotify/oauth'
 
 require_relative 'music_box'
 require_relative 'spotify'
@@ -130,7 +133,7 @@ module TestApp
               # Kick off the importer in the background.
               EventMachine.defer(
                 proc {
-                  Spotify.saved_tracks_importer(user).run(queue, res.to_set)
+                  SpotifyImporter.saved_tracks_importer(user).run(queue, res.to_set)
                 },
                 proc { |result|
                   puts "saved_tracks_import done"

@@ -8,4 +8,4 @@ gem 'opal-jquery'
 gem 'opal-vienna'
 gem 'sass'
 
-gem 'rspotify', :git => 'https://github.com/bebac/rspotify.git', :tag => 'v1.13.0'
+gem 'rspotify', :git => 'https://github.com/bebac/rspotify.git', :ref => '56a16924f556a16bb0c4b327641035be1c8064dd'

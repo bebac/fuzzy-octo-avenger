@@ -208,7 +208,7 @@ private:
       if ( err < 0 )
       {
         //_log_(error) << "snd_pcm_open failed! " << snd_strerror(err);
-        std::cerr << "snd_pcm_open failed! " << snd_strerror(err);
+        std::cerr << "snd_pcm_open '" << device_name_ << "' failed! " << snd_strerror(err) << std::endl;
         open_retries++;
         std::this_thread::sleep_for(std::chrono::seconds(1));
       }
@@ -218,7 +218,7 @@ private:
       }
     }
 
-    err = snd_pcm_set_params(handle_, SND_PCM_FORMAT_S32_LE, SND_PCM_ACCESS_RW_INTERLEAVED, 2, sample_rate_, 0, 500*1024);
+    err = snd_pcm_set_params(handle_, SND_PCM_FORMAT_S32_LE, SND_PCM_ACCESS_RW_INTERLEAVED, 2, sample_rate_, 0, 100000);
     if ( err < 0 ) {
       //_log_(error) << "snd_pcm_set_params failed! " << snd_strerror(err);
       std::cerr << "snd_pcm_set_params failed! " << snd_strerror(err);

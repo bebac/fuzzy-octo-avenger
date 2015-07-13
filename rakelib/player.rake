@@ -22,6 +22,7 @@ namespace :player do
     }
   end
 
+=begin no longer works!
   desc """Continuous playback - Leave out tags to clear filter. To
   include multiple tags use a quoted string with tags separated by
   space. Example: rake player:ctpb[127.0.0.1,\"pop rock\"]
@@ -53,5 +54,5 @@ namespace :player do
 
     spotihifi_call(ip, "player/ctpb", params)
   end
-
+=end
 end

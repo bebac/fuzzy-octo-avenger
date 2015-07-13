@@ -107,7 +107,6 @@ void run(const options& options)
   service.add_method("player/skip",          std::bind(&json_rpc::skip,                std::ref(player), _1));
   service.add_method("player/stop",          std::bind(&json_rpc::stop,                std::ref(player), _1));
   service.add_method("player/state",         std::bind(&json_rpc::state,               std::ref(player), _1));
-  service.add_method("player/ctpb",          std::bind(&json_rpc::continuous_playback, std::ref(player), _1));
 #if 0
   service.add_method("db/tags",          std::bind(&json_rpc::tags,                std::ref(player), _1));
   service.add_method("db/export-tracks", std::bind(&json_rpc::export_tracks,       std::ref(player), _1));

@@ -30,10 +30,6 @@
 #include <random>
 
 // ----------------------------------------------------------------------------
-const int player_status_ok              = 0;
-const int player_status_track_not_found = 1;
-
-// ----------------------------------------------------------------------------
 struct player_state_info
 {
   std::string state;
@@ -90,15 +86,10 @@ public:
   int  play(int id, const std::string& source_name="");
   int  queue(int id, const std::string& source_name="");
 #endif
-  //int  queue(track_ptr track);
   void skip();
   void stop();
 public:
   player_state_info get_state_info() const;
-public:
-  std::shared_ptr<source_base> find_source(const std::string& source_name);
-public:
-  void set_continuous_playback(json::object value);
 private:
   void init();
   void loop();
@@ -115,10 +106,10 @@ private:
 private:
   void play_stop();
   void play_from_queue();
-  void open_audio_output();
-  void close_audio_output();
-  void source_play(const dm::track_source& source);
-  void queue_continuous_playback_tracks();
+  void play_source(const dm::track_source& source);
+private:
+  void audio_output_open();
+  void audio_output_close();
 private:
   std::function<void(const player_state_info& state_info)> state_info_cb_;
 private:
@@ -127,7 +118,6 @@ private:
   std::shared_ptr<audio_output_t> audio_output_;
   player_queue<dm::track> play_queue_;
   bool continuous_playback_;
-  json::object continuous_playback_filter_;
   player_ctbp_selector ctpb_selector_;
   player_state_info state_;
 private:

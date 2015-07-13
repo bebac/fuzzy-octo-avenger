@@ -215,51 +215,6 @@ player_state_info player::get_state_info() const
 }
 
 // ----------------------------------------------------------------------------
-std::shared_ptr<source_base> player::find_source(const std::string& source_name)
-{
-  auto promise = std::make_shared<std::promise<std::shared_ptr<source_base>>>();
-  command_queue_.push([=]()
-  {
-    auto it = sources_.find(source_name);
-
-    if ( it != end(sources_) ) {
-      promise->set_value((*it).second);
-    }
-    else {
-      promise->set_value(nullptr);
-    }
-  });
-  return promise->get_future().get();
-}
-
-// ----------------------------------------------------------------------------
-void player::set_continuous_playback(json::object value)
-{
-  auto& filter = value["filter"];
-  auto& enable = value["enable"];
-
-  command_queue_.push([=]()
-  {
-    if ( filter.is_object() ) {
-      continuous_playback_filter_ = std::move(filter.as_object());
-    }
-
-    play_queue_.erase_priority(3);
-
-    if ( enable.is_true() )
-    {
-      continuous_playback_ = true;
-    }
-    else if ( enable.is_false() )
-    {
-      continuous_playback_ = false;
-    }
-
-    queue_continuous_playback_tracks();
-  });
-}
-
-// ----------------------------------------------------------------------------
 void player::init()
 {
   ctpb_selector_.init();
@@ -271,14 +226,7 @@ void player::loop()
   init();
   while ( running_ )
   {
-    auto cmd = command_queue_.pop(std::chrono::seconds(5), [this]
-      {
-#if 0
-        if ( continuous_playback_ ) {
-          queue_continuous_playback_tracks();
-        }
-#endif
-      });
+    auto cmd = command_queue_.pop(std::chrono::seconds(5), [this] {});
     cmd();
   }
 }
@@ -308,25 +256,6 @@ void player::play_id_handler(int id, const std::string& source_name, std::shared
     else {
       promise->set_value(player_status_track_not_found);
     }
-  }
-  else
-  {
-    promise->set_value(player_status_track_not_found);
-  }
-}
-#endif
-
-// ----------------------------------------------------------------------------
-#if 0
-void player::play_track_handler(track_ptr track, std::shared_ptr<std::promise<int>> promise)
-{
-  auto uri = track->find_source_uri("");
-
-  if ( uri.length() > 0 )
-  {
-    promise->set_value(player_status_ok);
-    open_audio_output();
-    play_flac(uri);
   }
   else
   {
@@ -404,7 +333,7 @@ void player::play_stop()
 {
   if ( state_.state == playing )
   {
-    close_audio_output();
+    audio_output_close();
 
     state_.state = stopped;
 
@@ -436,10 +365,10 @@ void player::play_from_queue()
     std::cout << "player state=" << state_.state << std::endl;
 
     if ( !audio_output_ ) {
-      open_audio_output();
+      audio_output_open();
     }
 
-    source_play(src);
+    play_source(src);
 
     play_queue_.pop();
   }
@@ -455,31 +384,37 @@ void player::play_from_queue()
 }
 
 // ----------------------------------------------------------------------------
-void player::open_audio_output()
+void player::audio_output_open()
 {
   audio_output_.reset(new audio_output_t(audio_device_));
 
-  audio_output_->set_start_marker_callback([this]() {
+  audio_output_->set_start_marker_callback(
+    [this]() {
       command_queue_.push(std::bind(&player::start_of_track_handler, this));
-    });
+    }
+  );
 
-  audio_output_->set_end_marker_callback([this]() {
+  audio_output_->set_end_marker_callback(
+    [this]() {
       command_queue_.push(std::bind(&player::end_of_track_handler, this));
-    });
+    }
+  );
 
-  audio_output_->set_error_callback([this](const std::string& error_message) {
+  audio_output_->set_error_callback(
+    [this](const std::string& error_message) {
       command_queue_.push(std::bind(&player::audio_output_error, this, error_message));
-    });
+    }
+  );
 }
 
 // ----------------------------------------------------------------------------
-void player::close_audio_output()
+void player::audio_output_close()
 {
   audio_output_.reset();
 }
 
 // ----------------------------------------------------------------------------
-void player::source_play(const dm::track_source& source)
+void player::play_source(const dm::track_source& source)
 {
   auto it = sources_.find(source.name());
   if ( it != end(sources_) )
@@ -490,47 +425,4 @@ void player::source_play(const dm::track_source& source)
   {
     std::cerr << "no source found! source=" << source.name() << std::endl;
   }
-}
-
-// ----------------------------------------------------------------------------
-void player::queue_continuous_playback_tracks()
-{
-#if 0
-  if ( continuous_playback_ && play_queue_.size() < 3 )
-  {
-    std::vector<database::track_ptr> tracks;
-
-    if ( continuous_playback_filter_["tags"].is_array() )
-    {
-      track_base::tag_set_t tags;
-
-      for ( auto& tag : continuous_playback_filter_["tags"].as_array() ) {
-        tags.insert(tag.as_string());
-      }
-
-      tracks = std::move(db_.tracks(tags));
-
-      std::cerr << "continuous playback filter track.size=" << tracks.size() << std::endl;
-    }
-    else
-    {
-      tracks = std::move(db_.tracks());
-
-      std::cerr << "continuous playback track.size=" << tracks.size() << std::endl;
-    }
-
-    std::random_device rd;
-    std::mt19937       g(rd());
-
-    std::shuffle(tracks.begin(), tracks.end(), g);
-
-    unsigned queue_max = tracks.size() < 25 ? tracks.size() : 5;
-
-    while ( play_queue_.size() < queue_max && !tracks.empty())
-    {
-      play_queue_.push(tracks.back(), 3);
-      tracks.pop_back();
-    }
-  }
-#endif
 }

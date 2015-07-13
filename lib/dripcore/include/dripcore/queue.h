@@ -30,7 +30,7 @@ namespace dripcore
   public:
     queue(context& context) : context_(context)
     {
-      if ( (fd_ = eventfd(0, 0)) == -1 ) {
+      if ( (fd_ = eventfd(0, EFD_NONBLOCK)) == -1 ) {
         throw std::system_error(errno, std::system_category());
       }
       set_rd_handler(std::bind(&queue::read_handler, this));
@@ -58,6 +58,9 @@ namespace dripcore
           q_.front()();
           q_.pop();
         }
+      }
+      else if ( res < 0 && errno == EAGAIN )
+      {
       }
       else
       {

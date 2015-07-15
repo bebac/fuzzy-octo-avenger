@@ -19,78 +19,29 @@
 #include <queue>
 
 // ----------------------------------------------------------------------------
-#include <unistd.h>
-#include <sys/eventfd.h>
-
-// ----------------------------------------------------------------------------
 namespace dripcore
 {
   class queue : public eventable
   {
+    using container  = std::queue<std::function<void()>>;
+    using mutex      = std::mutex;
+    using lock_guard = std::lock_guard<mutex>;
   public:
-    queue(context& context) : context_(context)
-    {
-      if ( (fd_ = eventfd(0, EFD_NONBLOCK)) == -1 ) {
-        throw std::system_error(errno, std::system_category());
-      }
-      set_rd_handler(std::bind(&queue::read_handler, this));
-    }
+    queue(context& context);
   public:
-    void push(std::function<void()>&& command)
-    {
-      std::lock_guard<std::mutex> _(lock_);
-      q_.push(std::move(command));
-      notify_one();
-    }
+    void push(std::function<void()>&& command);
   public:
-    void read_handler()
-    {
-      uint64_t v;
-
-      ssize_t res = read(fd_, &v, sizeof(uint64_t));
-
-      if ( res == sizeof(uint64_t) )
-      {
-        std::lock_guard<std::mutex> _(lock_);
-
-        while ( v-- > 0 )
-        {
-          q_.front()();
-          q_.pop();
-        }
-      }
-      else if ( res < 0 && errno == EAGAIN )
-      {
-      }
-      else
-      {
-        throw std::system_error(errno, std::system_category());
-      }
-    }
+    int get_os_handle() const final;
   public:
-    int get_os_handle() const
-    {
-      return fd_;
-    }
-  public:
-    dripcore::context& get_context()
-    {
-      return context_;
-    }
+    dripcore::context& get_context() final { return context_; }
   private:
-    void notify_one()
-    {
-      uint64_t v = 1;
-      if ( write(fd_, &v, sizeof(uint64_t)) < 0 )
-      {
-        throw std::system_error(errno, std::system_category());
-      }
-    }
+    void read_handler();
+    void notify_one();
   private:
-    context& context_;
-    std::mutex lock_;
-    int fd_;
-    std::queue<std::function<void()>> q_;
+    context&  context_;
+    mutex     lock_;
+    int       fd_;
+    container q_;
   };
 } // namespace dripcore
 

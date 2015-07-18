@@ -38,12 +38,33 @@ struct player_state_info
 };
 
 // ----------------------------------------------------------------------------
-class player_ctbp_selector
+class random_generator
 {
-private:
   using engine       = std::default_random_engine;
   using distribution = std::uniform_int_distribution<int>;
   using device       = std::random_device;
+public:
+  random_generator(int min, int max)
+    :
+    rd_(),
+    re_(rd_()),
+    di_(min, max)
+  {
+  }
+public:
+  int next()
+  {
+    return di_(re_);
+  }
+private:
+  device       rd_;
+  engine       re_;
+  distribution di_;
+};
+
+// ----------------------------------------------------------------------------
+class player_ctbp_selector
+{
 public:
   player_ctbp_selector();
 public:
@@ -52,8 +73,7 @@ public:
 public:
   dm::track next();
 private:
-  device rd_;
-  engine re_;
+  std::unique_ptr<random_generator> rg_;
 private:
   std::vector<std::string> track_ids_;
 };

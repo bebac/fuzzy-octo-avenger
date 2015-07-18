@@ -22,8 +22,6 @@ static const std::string playing = "playing";
 // ----------------------------------------------------------------------------
 player_ctbp_selector::player_ctbp_selector()
   :
-  rd_(),
-  re_(rd_()),
   track_ids_()
 {
 }
@@ -39,7 +37,7 @@ void player_ctbp_selector::init()
     return true;
   });
 
-  std::shuffle(track_ids_.begin(), track_ids_.end(), re_);
+  rg_.reset(new random_generator(0, track_ids_.size()-1));
 
   std::cout << "ctpb selector init track size " << track_ids_.size() << std::endl;
 }
@@ -58,7 +56,7 @@ void player_ctbp_selector::init_by_tag(std::string tag)
     return true;
   });
 
-  std::shuffle(track_ids_.begin(), track_ids_.end(), re_);
+  rg_.reset(new random_generator(0, track_ids_.size()-1));
 
   std::cout << "ctpb selector init track size " << track_ids_.size() << std::endl;
 }
@@ -66,9 +64,8 @@ void player_ctbp_selector::init_by_tag(std::string tag)
 // ----------------------------------------------------------------------------
 dm::track player_ctbp_selector::next()
 {
-  distribution dist(0, track_ids_.size()-1);
-
-  auto track = dm::track::find_by_id(track_ids_[dist(re_)]);
+  auto next = track_ids_[rg_->next()];
+  auto track = dm::track::find_by_id(next);
 
   return track;
 }

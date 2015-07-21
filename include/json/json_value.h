@@ -62,11 +62,18 @@ namespace json
   public:
     ~value();
   public:
+    operator std::string() const;
+    operator double() const;
+    operator bool() const;
+    operator json::object() const;
+    operator json::array() const;
+  public:
     type type_id() const noexcept { return type_; }
   public:
     bool is_null()   const noexcept { return type_ == type::nul; }
     bool is_true()   const noexcept { return type_ == type::tru; }
     bool is_false()  const noexcept { return type_ == type::fal; }
+    bool is_bool()   const noexcept { return is_true() || is_false(); }
     bool is_string() const noexcept { return type_ == type::str; }
     bool is_number() const noexcept { return type_ == type::num; }
     bool is_array()  const noexcept { return type_ == type::arr; }
@@ -82,6 +89,12 @@ namespace json
     {
       assert(is_number());
       return num_;
+    }
+  public:
+    bool as_bool() const
+    {
+      assert(is_bool());
+      return t_f_;
     }
   public:
     //const array& as_array()  const

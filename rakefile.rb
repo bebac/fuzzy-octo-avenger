@@ -72,6 +72,13 @@ end
 Rake::ExecutableTask.new(:test, spec)
 
 # -----------------------------------------------------------------------------
+namespace :json do
+    task :update do
+        sh "git subtree pull --prefix lib/json/ https://github.com/bebac/json-cpp11-library.git master --squash"
+    end
+end
+
+# -----------------------------------------------------------------------------
 CLEAN.include('build')
 # -----------------------------------------------------------------------------
 task :default => [ :mboxd ]

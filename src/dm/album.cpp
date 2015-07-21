@@ -174,7 +174,7 @@ namespace dm
       assert(tracks.is_array());
 
       for ( auto& track : tracks.as_array() ) {
-        result.push_back(track.as_string());
+        result.push_back(track);
       }
     }
     return result;
@@ -219,7 +219,7 @@ namespace dm
       for ( auto& jtrack : tracks )
       {
         if ( jtrack.as_string() != track.id() ) {
-          new_tracks.push_back(jtrack.as_string());
+          new_tracks.push_back(jtrack);
         }
       }
       jtracks = std::move(new_tracks);
@@ -256,7 +256,7 @@ namespace dm
 
     if ( !id.is_null() )
     {
-      kvstore_->remove(id.as_string());
+      kvstore_->remove(id);
     }
   }
 

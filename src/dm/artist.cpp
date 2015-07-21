@@ -77,7 +77,7 @@ namespace dm
       if ( albums.is_array() )
       {
         for ( auto& album : albums.as_array() ) {
-          result.push_back(album.as_string());
+          result.push_back(album);
         }
       }
     }

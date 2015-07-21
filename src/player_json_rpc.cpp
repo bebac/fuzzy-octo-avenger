@@ -28,12 +28,10 @@ namespace json_rpc
     if ( request.params().is_object() )
     {
       auto& params = request.params().as_object();
-      auto& tag_member = params["tag"];
+      auto& tag = params["tag"];
 
-      if ( tag_member.is_string() )
+      if ( tag.is_string() )
       {
-        auto tag = tag_member.as_string();
-
         auto msg = player.play_tag(tag);
 
         if ( msg == "ok" ) {
@@ -77,7 +75,7 @@ namespace json_rpc
 
       if ( id.is_string() )
       {
-        auto track = dm::track::find_by_id(id.as_string());
+        auto track = dm::track::find_by_id(id);
 
         if ( !track.is_null() )
         {
@@ -153,12 +151,11 @@ namespace json_rpc
     if ( request.params().is_object() )
     {
       auto& params = request.params().as_object();
-
       auto& album_id = params["album_id"];
 
       if ( album_id.is_string() )
       {
-        auto cover = dm::album_cover::find_by_album_id(album_id.as_string());
+        auto cover = dm::album_cover::find_by_album_id(album_id);
 
         if ( !cover.is_null() ) {
           response.set_result(cover.data());

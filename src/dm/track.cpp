@@ -57,7 +57,7 @@ namespace dm
       {
         for ( auto& alt_id : alt_ids.as_array() )
         {
-          index_.set(alt_id.as_string(), value["id"].as_string());
+          index_.set(alt_id, value["id"]);
         }
       }
       return true;
@@ -150,7 +150,7 @@ namespace dm
   const json::array track::tags() const
   {
     if ( data_.has_member("tags") ) {
-      return data_.at("tags").as_array();
+      return data_.at("tags");
     }
     else {
       return json::array();

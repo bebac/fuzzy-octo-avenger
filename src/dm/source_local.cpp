@@ -40,7 +40,7 @@ namespace dm
       data_ = json::object{ { directories_key, json::array() } };
     }
     else if ( data.is_object() ) {
-      data_ = data.as_object();
+      data_ = std::move(data.as_object());
     }
     else {
       // TODO: Error!
@@ -54,7 +54,7 @@ namespace dm
     for ( auto& dir : data_.at(directories_key).as_array() )
     {
       if ( dir.is_string() ) {
-        res.push_back(dir.as_string());
+        res.push_back(dir);
       }
       else {
         // TODO: Error!

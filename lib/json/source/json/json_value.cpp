@@ -160,6 +160,31 @@ namespace json
     free_value();
   }
 
+  value::operator std::string() const
+  {
+    return as_string();
+  }
+
+  value::operator double() const
+  {
+    return as_number();
+  }
+
+  value::operator bool() const
+  {
+    return as_bool();
+  }
+
+  value::operator json::object() const
+  {
+    return as_object();
+  }
+
+  value::operator json::array() const
+  {
+    return as_array();
+  }
+
   void value::write(std::ostream& os) const
   {
     switch ( type_ )

@@ -1,8 +1,3 @@
 <div id="album-thumbs-container">
   <div id="album-thumbs"></div>
 </div>
-
-<div id="album-details-container" class="hidden">
-  <div id="album-details">
-  </div>
-</div>

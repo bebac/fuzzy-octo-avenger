@@ -11,15 +11,36 @@
     <div id="nav-container">
       <div id="nav">
         <ul>
-          <li><a href="#/albums">ALBUMS</a></li>
-          <li><a href="#/settings">SETTINGS</a></li>
+          <li id="menu-toggle"><a href="#/menu">MENU</a></li>
         </ul>
       </div>
     </div>
 
-    <div id="view-container">
-    </div>
+    <div id="content">
 
+      <div id="menu">
+        <ul>
+          <li>
+            <div>ALBUMS</div>
+            <ul>
+              <li><a href="#/albums">All</a></li>
+            </ul>
+          </li>
+
+          <li>
+            <div><a href="#/settings">SETTINGS</a></div>
+          </li>
+        </ul>
+      </div>
+
+      <div id="view-container"></div>
+
+      <div id="album-details-container" class="hidden">
+        <div id="album-details">
+        </div>
+      </div>
+
+    </div>
     </div>
   </body>
 </html>

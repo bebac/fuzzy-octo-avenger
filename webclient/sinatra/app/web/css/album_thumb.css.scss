@@ -1,9 +1,12 @@
+$thumb-color: #A9A395;
+$thumb-bg-color: lighten($thumb-color, 30%) !default;
+
 .album-thumb
 {
   color: #333;
   width: 200px;
-  margin: 1.66em;
-  background-color: #ddd;
+  margin: 1.33em;
+  background-color: $thumb-bg-color;
   display: inline-block;
 
   div:nth-child(2) {
@@ -14,7 +17,7 @@
   }
 
   div:nth-child(1), div:nth-child(3) {
-    margin: 0.5em 0.5em 0.5em 0.5em;
+    margin: 0.33em 0.33em 0.33em 0.33em;
     font-size: 1em;
     text-overflow: ellipsis;
     white-space: nowrap;

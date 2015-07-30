@@ -1,3 +1,6 @@
+$album-details-color: #A9A395;
+$album-details-bg-color: lighten($album-details-color, 30%) !default;
+
 #album-details
 {
   h1, h2, hr {
@@ -94,7 +97,7 @@
     }
 
     li:hover {
-      background-color: #eee;
+      background-color: $album-details-bg-color;
     }
   }
 }

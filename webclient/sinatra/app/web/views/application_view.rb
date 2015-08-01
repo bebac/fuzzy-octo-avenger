@@ -8,6 +8,8 @@ class ApplicationView < Vienna::View
 
   def render
     super
+    @player_view = PlayerView.new
+    @player_view.render
   end
 
   def show_albums
@@ -48,7 +50,7 @@ class ApplicationView < Vienna::View
     Document.find('#nav-container').height
   end
 
-  on :click, '#menu-toggle' do |evt|
+  on :click, '#nav-menu' do |evt|
     menu = element.find('#menu')
     cont = Document.find('#view-container')
     menu.toggle(150, :swing, -> {

@@ -1,0 +1,7 @@
+<div class="action play">
+  <span>play</span><img height="10px" src="/assets/play_glyph.svg"></img>
+</div><div class="station">
+  all/random
+</div><div class="select">
+  <img width="12px" src="/assets/drop_glyph.svg"></img>
+</div>

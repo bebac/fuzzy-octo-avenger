@@ -1,3 +1,4 @@
+require 'opal'
 require 'sinatra'
 require 'omniauth'
 require 'rspotify'
@@ -28,6 +29,11 @@ module TestApp
   class Main < Sinatra::Base
     enable  :sessions
 
+    def initialize(app = nil, params = {})
+      super(app)
+      @sprockets = params.fetch(:sprockets, nil)
+    end
+
     use OmniAuth::Builder do
       provider :spotify, "8392143644964c5d84a51b65451f422c", "afd2e13d03ba4ace92f534bf2928e669",
                scope: 'user-read-email playlist-modify-public user-library-read user-library-modify'
@@ -36,6 +42,7 @@ module TestApp
     set :views, 'app/srv/views'
 
     get '/' do
+      @opal_boot_code = Opal::Processor.load_asset_code(@sprockets, 'application')
       erb :'index.html'
     end
 

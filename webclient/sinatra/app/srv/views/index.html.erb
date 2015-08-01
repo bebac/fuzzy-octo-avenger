@@ -3,6 +3,7 @@
   <head>
     <link rel="stylesheet" type="text/css" href="/assets/application.css">
     <script src="/assets/application.js"></script>
+    <script><%= @opal_boot_code %></script>
   </head>
 
   <body>
@@ -10,9 +11,15 @@
 
     <div id="nav-container">
       <div id="nav">
-        <ul>
-          <li id="menu-toggle"><a href="#/menu">MENU</a></li>
-        </ul>
+        <!--<div id="menu-toggle">
+          <a href="#/menu">MENU</a>
+        </div>-->
+        <div id="nav-menu">
+          <div class="menu"><a href="#/menu">&nbspMENU&nbsp</a></div>
+        </div>
+        <div id="nav-center"></div>
+        <div id="nav-player">
+        </div>
       </div>
     </div>
 

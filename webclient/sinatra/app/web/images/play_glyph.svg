@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   version="1.1"
+   id="svg4526"
+   viewBox="0 0 100 160"
+   height="160"
+   width="100"
+   inkscape:version="0.91 r13725"
+   sodipodi:docname="play_glyph.svg">
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="640"
+     inkscape:window-height="480"
+     id="namedview5259"
+     showgrid="false"
+     inkscape:zoom="1.475"
+     inkscape:cx="50"
+     inkscape:cy="80"
+     inkscape:window-x="380"
+     inkscape:window-y="180"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="svg4526" />
+  <defs
+     id="defs4528" />
+  <metadata
+     id="metadata4531">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     transform="translate(0,-892.3623)"
+     id="layer1"
+     style="fill:#aaaaaa;fill-opacity:1;stroke:#aaaaaa;stroke-opacity:1">
+    <path
+       id="path4542"
+       d="M 0.95719111,893.45475 99.047818,972.64578 0.95719111,1051.8368"
+       style="fill:#aaaaaa;fill-rule:evenodd;stroke:#aaaaaa;stroke-width:0.88135684px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;fill-opacity:1" />
+    <path
+       id="path4544"
+       d="m 0.9984624,896.259 0,61.10943 0,94.44167 z"
+       style="fill:#aaaaaa;fill-rule:evenodd;stroke:#aaaaaa;stroke-width:0.97613162px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;fill-opacity:1" />
+  </g>
+</svg>

@@ -2,13 +2,13 @@
 /*= require album_details */
 /*= require settings */
 
-html, body, h1, h2, h3, h4, p, div, li, ul {
+html, body, h1, h2, h3, h4, p, div, li, ul, span {
   margin: 0 0 0 0;
   padding: 0 0 0 0;
 }
 
 html {
-  font-family: sans-serif;
+  font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif;
 }
 
 #nav-container
@@ -23,19 +23,38 @@ html {
 #nav
 {
   position: relative;
+  width: 100%;
   top: 0;
-  padding: 1em;
 
   a {
-    color: #bbb;
+    color: #aaaaaa;
     text-decoration: none;
-    font-weight: bold;
   }
 
-  li {
+  div {
     display: inline-block;
+    vertical-align: middle;
   }
 }
+
+#menu-toggle {
+  width: 19%;
+  padding: 0.66em;
+}
+
+#nav-center {
+  width: 60%;
+}
+
+#nav-menu, #nav-player {
+  padding: 0.66em;
+  text-align: right;
+}
+
+#nav-player {
+  float: right;
+}
+
 
 #content
 {
@@ -66,6 +85,7 @@ $menu-h2-color: lighten($menu-color, 20%) !default;
     {
       background: #fff;
       padding: 0;
+      margin-top: 0px;
       margin-bottom: 1px;
 
       a:link {
@@ -88,6 +108,7 @@ $menu-h2-color: lighten($menu-color, 20%) !default;
       ul
       {
         list-style-type: none;
+        padding-top: 0em;
         li
         {
           color: #666;
@@ -134,3 +155,73 @@ $menu-h2-color: lighten($menu-color, 20%) !default;
   background-color: #fff
 }
 
+
+
+$player-color: #aaaaaa;
+$player-base-color: #4D4D4E;
+$player-bg-color: lighten($player-base-color, 3%) !default;
+$player-active-color: lighten($player-bg-color, 5%) !default;
+
+//$player-color: #777;
+//$player-bg-color: #d7d4cd;
+//$player-active-color: darken($player-bg-color, 5%) !default;
+
+//$player-color: #B2B2B2;
+//$player-bg-color: #646464;
+//$player-active-color: lighten($player-bg-color, 5%) !default;
+
+#nav-player, #nav-menu
+{
+  .menu, .play, .station, .select
+  {
+    display: inline-block;
+    color: $player-color;
+    background: $player-bg-color;
+    margin: 0 auto;
+    padding: 0.33em 0.66em 0.33em;
+    box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.2);
+  }
+
+  .menu
+  {
+    border-radius: 12px 12px 12px 12px;
+
+    &:hover
+    {
+      background: $player-active-color;
+    }
+  }
+
+  .play
+  {
+    cursor: pointer;
+    border-radius: 12px 0px 0px 12px;
+    border-right: 2px solid rgba(0, 0, 0, 0.2);
+
+    span {
+      padding-right: 0.66em;
+    }
+
+    &:hover
+    {
+      background: $player-active-color;
+    }
+  }
+
+  .station
+  {
+    width: 200px;
+  }
+
+  .select
+  {
+    cursor: pointer;
+    border-radius: 0px 12px 12px 0px;
+    border-left: 1px solid rgba(0, 0, 0, 0.2);
+
+    &:hover
+    {
+      background: $player-active-color;
+    }
+  }
+}

@@ -9,7 +9,7 @@ opal = Opal::Server.new {|s|
   s.append_path 'app/web/css'
   s.append_path 'app/web/javascript'
   s.main = 'application'
-  s.debug = true
+  #s.debug = true
 }
 
 sprockets   = opal.sprockets

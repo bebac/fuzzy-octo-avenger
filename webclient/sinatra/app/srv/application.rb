@@ -46,6 +46,30 @@ module TestApp
       erb :'index.html'
     end
 
+    get '/player/state' do
+      MusicBox.call("player/state") do |req|
+        req.callback { |res| ok(res.to_json) }
+        req.errback  { |err| error(err) }
+      end
+      [-1, {}, []]
+    end
+
+    post '/player/play' do
+      MusicBox.call("player/play") do |req|
+        req.callback { |res| ok(res.to_json) }
+        req.errback  { |err| error(err) }
+      end
+      [-1, {}, []]
+    end
+
+    post '/player/stop' do
+      MusicBox.call("player/stop") do |req|
+        req.callback { |res| ok(res.to_json) }
+        req.errback  { |err| error(err) }
+      end
+      [-1, {}, []]
+    end
+
     get '/sources/local' do
       MusicBox.call("db/get/source_local") do |req|
         req.callback { |res| ok(res.to_json) }
@@ -118,6 +142,32 @@ module TestApp
         }.to_json
       else
         nil.to_json
+      end
+    end
+
+    get '/events', provides: 'text/event-stream' do
+      stream(:keep_open) do |out|
+        EM.next_tick {
+          # Keep connection alive.
+          timer = EM.add_periodic_timer(10) {
+            out << "data: #{{}.to_json}\n\n"
+          }
+
+          # Subscribe to player/event
+          sid = MusicBox.conn.subscribe do |msg|
+            out << "data: #{msg.to_json}\n\n"
+          end
+
+          out.callback do
+            p "unsubscribe sid=#{sid}"
+            MusicBox.conn.unsubscribe(sid)
+            timer.cancel
+          end
+        }
+
+        stream.errback do
+          logger.info "subscribe failed!"
+        end
       end
     end
 

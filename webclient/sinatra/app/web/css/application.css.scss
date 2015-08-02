@@ -172,7 +172,7 @@ $player-active-color: lighten($player-bg-color, 5%) !default;
 
 #nav-player, #nav-menu
 {
-  .menu, .play, .station, .select
+  .menu, .action, .station, .select
   {
     display: inline-block;
     color: $player-color;
@@ -192,7 +192,7 @@ $player-active-color: lighten($player-bg-color, 5%) !default;
     }
   }
 
-  .play
+  .action
   {
     cursor: pointer;
     border-radius: 12px 0px 0px 12px;

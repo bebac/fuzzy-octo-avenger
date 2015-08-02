@@ -1,17 +1,45 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
 <svg
    xmlns:dc="http://purl.org/dc/elements/1.1/"
    xmlns:cc="http://creativecommons.org/ns#"
    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
    xmlns:svg="http://www.w3.org/2000/svg"
    xmlns="http://www.w3.org/2000/svg"
-   version="1.1"
-   id="svg4575"
-   viewBox="0 0 354.33071 566.92913"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="100mm"
    height="160mm"
-   width="100mm">
+   viewBox="0 0 354.33071 566.92913"
+   id="svg4575"
+   version="1.1"
+   inkscape:version="0.91 r13725"
+   sodipodi:docname="stop_glyph.svg">
   <defs
      id="defs4577" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.98994949"
+     inkscape:cx="375"
+     inkscape:cy="317.96949"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="true"
+     inkscape:window-width="1920"
+     inkscape:window-height="1056"
+     inkscape:window-x="0"
+     inkscape:window-y="24"
+     inkscape:window-maximized="1">
+    <inkscape:grid
+       type="xygrid"
+       id="grid4591" />
+  </sodipodi:namedview>
   <metadata
      id="metadata4580">
     <rdf:RDF>
@@ -25,14 +53,16 @@
     </rdf:RDF>
   </metadata>
   <g
-     transform="translate(0,-485.43307)"
-     id="layer1">
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(0,-485.43307)">
     <rect
-       y="612.3512"
-       x="-0.010986977"
-       height="320.02197"
-       width="356.81818"
+       style="opacity:1;fill:#aaaaaf;fill-opacity:0.94117647;fill-rule:nonzero;stroke:#b4b4b4;stroke-width:4.97802591;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        id="rect4593"
-       style="opacity:1;fill:#4d4d4d;fill-opacity:1;fill-rule:nonzero;stroke:#b4b4b4;stroke-width:4.97802591;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+       width="356.81818"
+       height="320.02197"
+       x="-0.010986977"
+       y="612.3512" />
   </g>
 </svg>

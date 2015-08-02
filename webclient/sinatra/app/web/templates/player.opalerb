@@ -1,5 +1,10 @@
+<% if playing %>
+<div class="action stop">
+  <span>stop</span><img height="10px" src="/assets/stop_glyph.svg"></img>
+<% else %>
 <div class="action play">
   <span>play</span><img height="10px" src="/assets/play_glyph.svg"></img>
+<% end %>
 </div><div class="station">
   all/random
 </div><div class="select">

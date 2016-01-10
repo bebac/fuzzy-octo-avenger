@@ -265,27 +265,28 @@ namespace dm
       throw std::runtime_error("track source name must be a string");
     }
 
-    auto& sources = data_["sources"];
+    auto& data_sources = data_["sources"];
 
-    if ( sources.is_array() )
+    if ( data_sources.is_array() )
     {
-      for ( auto& jobj : sources.as_array() )
+      auto& sources = data_sources.as_array();
+      for ( auto& v : sources )
       {
-        auto& s = jobj.as_object();
+        auto& source = v.as_object();
 
-        if ( !s.empty() && s["name"].as_string() == name.as_string() )
+        if ( !source.empty() && source["name"].as_string() == name.as_string() )
         {
           // Replace source.
-          s = std::move(jsource);
+          source = std::move(jsource);
           return;
         }
-        // Add new source.
-        sources.as_array().push_back(std::move(jsource));
       }
+      // Add new source.
+      sources.push_back(std::move(jsource));
     }
     else
     {
-      sources = json::array{ std::move(jsource) };
+      data_sources = json::array{ std::move(jsource) };
     }
   }
 

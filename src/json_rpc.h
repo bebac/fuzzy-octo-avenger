@@ -175,6 +175,7 @@ namespace jsonrpc
 
   class service
   {
+    using lock_guard = std::lock_guard<std::recursive_mutex>;
     using method_func = std::function<json_rpc_response(const json_rpc_request& request)>;
   public:
     service();
@@ -199,6 +200,7 @@ namespace jsonrpc
   private:
     method_map_t             methods_;
     connection_container     connections_;
+    std::recursive_mutex     mutex_;
   };
 }
 

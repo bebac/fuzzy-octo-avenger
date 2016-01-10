@@ -44,6 +44,8 @@ namespace jsonrpc
 
   void service::send_notification(json_rpc_notification notification)
   {
+    lock_guard lock(mutex_);
+
     for ( auto& ptr : connections_ )
     {
       auto connection = ptr.lock();
@@ -57,11 +59,13 @@ namespace jsonrpc
 
   void service::attach_connection(std::shared_ptr<server::connection> connection)
   {
+    lock_guard lock(mutex_);
     connections_.insert(connection);
   }
 
   void service::detach_connection(std::shared_ptr<server::connection> connection)
   {
+    lock_guard lock(mutex_);
     connections_.erase(connection);
   }
 }

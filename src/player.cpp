@@ -320,6 +320,12 @@ void player::audio_output_error(const std::string& error_message)
     << "track=" << state_.track.to_json()
     << std::endl;
 
+  // What an ugly way to handle this!!!
+  if ( error_message == "track unavailable" && state_.source == "spotify" )
+  {
+    state_.track.source_remove(state_.source);
+  }
+
   audio_output_.reset();
 
   play_from_queue();
@@ -353,19 +359,26 @@ void player::play_from_queue()
     auto track = play_queue_.front();
     auto src   = track.find_source();
 
-    std::cerr << "play_from_queue id=" << track.id() << ", title='" << track.title() << "', source=" << src.name() << std::endl;
+    if ( !src.is_null() )
+    {
+      std::cerr << "play_from_queue id=" << track.id() << ", title='" << track.title() << "', source=" << src.name() << std::endl;
 
-    state_.state  = playing;
-    state_.track  = std::move(track);
-    state_.source = src.name();
+      state_.state  = playing;
+      state_.track  = std::move(track);
+      state_.source = src.name();
 
-    std::cout << "player state=" << state_.state << std::endl;
+      std::cout << "player state=" << state_.state << std::endl;
 
-    if ( !audio_output_ ) {
-      audio_output_open();
+      if ( !audio_output_ ) {
+        audio_output_open();
+      }
+
+      play_source(src);
     }
-
-    play_source(src);
+    else
+    {
+      std::cerr << "play_from_queue id=" << track.id() << ", title='" << track.title() << "', NO SOURCE!" << std::endl;
+    }
 
     play_queue_.pop();
   }

@@ -62,6 +62,33 @@ namespace dm
       }
       return true;
     });
+
+#if 0
+    track::each([&](track& track) -> bool
+    {
+      auto& sources = track.data_["sources"];
+
+      if ( sources.is_array() )
+      {
+        json::array new_sources;
+
+        for ( auto& obj : sources.as_array() )
+        {
+          auto& source = obj.as_object();
+
+          if ( !source.empty() )
+          {
+            new_sources.push_back(source);
+          }
+        }
+        // Replace sources.
+        sources = new_sources;
+        // Save track changes.
+        track.save();
+      }
+      return true;
+    });
+#endif
   }
 
   track::track()
@@ -246,7 +273,7 @@ namespace dm
       {
         auto& s = jobj.as_object();
 
-        if ( s["name"].as_string() == name.as_string() )
+        if ( !s.empty() && s["name"].as_string() == name.as_string() )
         {
           // Replace source.
           s = std::move(jsource);
@@ -274,7 +301,7 @@ namespace dm
       {
         auto& s = obj.as_object();
 
-        if ( s["name"].as_string() != name )
+        if ( !s.empty() && s["name"].as_string() != name )
         {
           new_sources.push_back(s);
         }
@@ -327,9 +354,14 @@ namespace dm
         }
         return track_source();
       }
-      else
+      else if ( sources.size() > 0 )
       {
         return track_source{sources[0].as_object()};
+      }
+      else
+      {
+        std::cerr << "no sources " << sources << std::endl;
+        return track_source();
       }
     }
     else

@@ -65,7 +65,7 @@ spec = Rake::ExecutableSpecification.new do |s|
         test/**/*.cpp
 
     )
-    s.libraries += [ dm, dc, json ] + %w(asound FLAC++ tag b64 kyotocabinet)
+    s.libraries += [ dm, dc, json ] + %w(asound FLAC++ tag kyotocabinet)
 end
 
 # -----------------------------------------------------------------------------

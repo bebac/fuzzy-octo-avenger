@@ -463,10 +463,10 @@ int spotify_source::music_delivery(sp_session *session, const sp_audioformat *fo
 {
   auto self = reinterpret_cast<spotify_source*>(sp_session_userdata(session));
 
-  if ( !self->audio_output_.expired() )
-  {
-    auto audio_output = self->audio_output_.lock();
+  auto audio_output = self->audio_output_.lock();
 
+  if ( audio_output )
+  {
     if ( audio_output->sample_rate() != static_cast<unsigned>(format->sample_rate) ) {
       audio_output->set_sample_rate(format->sample_rate);
     }

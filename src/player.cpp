@@ -137,6 +137,10 @@ std::string player::play()
         promise->set_value("queue is empty");
       }
     }
+    else
+    {
+      promise->set_value("ok");
+    }
   });
   return promise->get_future().get();
 }

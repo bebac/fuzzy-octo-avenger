@@ -378,13 +378,14 @@ void player::play_from_queue()
       }
 
       play_source(src);
+      play_queue_.pop();
     }
     else
     {
       std::cerr << "play_from_queue id=" << track.id() << ", title='" << track.title() << "', NO SOURCE!" << std::endl;
+      play_queue_.pop();
+      play_from_queue();
     }
-
-    play_queue_.pop();
   }
   else if ( continuous_playback_ )
   {
